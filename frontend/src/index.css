@@ -1,0 +1,259 @@
+
+/* ===========================
+   Global Styles
+=========================== */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+
+html {
+  scroll-behavior: smooth;
+}
+
+
+html,
+body,
+#root {
+
+  width: 100%;
+
+  min-height: 100vh;
+
+}
+
+
+
+body {
+
+  font-family:
+    "Segoe UI",
+    Arial,
+    Helvetica,
+    sans-serif;
+
+  background-color: #f8f9fa;
+
+  color: #212529;
+
+}
+
+
+
+
+/* ===========================
+   Links
+=========================== */
+
+
+a {
+
+  text-decoration: none;
+
+  color: inherit;
+
+}
+
+
+
+a:hover {
+
+  color: #0d6efd;
+
+}
+
+
+
+
+/* ===========================
+   Lists
+=========================== */
+
+
+ul,
+ol {
+
+  list-style: none;
+
+  padding: 0;
+
+  margin: 0;
+
+}
+
+
+
+
+/* ===========================
+   Images
+=========================== */
+
+
+img {
+
+  max-width: 100%;
+
+  display: block;
+
+}
+
+
+
+
+/* ===========================
+   Buttons
+=========================== */
+
+
+button {
+
+  cursor: pointer;
+
+}
+
+
+
+.btn {
+
+  transition: 0.3s ease;
+
+}
+
+
+
+.btn:hover {
+
+  transform: translateY(-2px);
+
+}
+
+
+
+
+/* ===========================
+   Cards
+=========================== */
+
+
+.card {
+
+  border: none;
+
+  border-radius: 12px;
+
+  overflow: hidden;
+
+}
+
+
+
+.card img {
+
+  object-fit: cover;
+
+}
+
+
+
+
+/* ===========================
+   Navbar
+=========================== */
+
+
+.navbar {
+
+  padding: 12px 0;
+
+}
+
+
+
+.navbar-brand {
+
+  font-size: 1.4rem;
+
+}
+
+
+
+
+/* ===========================
+   Hero Section
+=========================== */
+
+
+.hero {
+
+  min-height: 80vh;
+
+  display: flex;
+
+  align-items: center;
+
+}
+
+
+
+
+/* ===========================
+   Footer
+=========================== */
+
+
+footer {
+
+  margin-top: 50px;
+
+}
+
+
+
+footer a:hover {
+
+  color: #0d6efd;
+
+}
+
+
+
+
+/* ===========================
+   Container
+=========================== */
+
+
+.container {
+
+  padding-top: 20px;
+
+  padding-bottom: 20px;
+
+}
+
+
+
+
+/* ===========================
+   Mobile
+=========================== */
+
+
+@media(max-width:768px) {
+
+
+  .hero {
+
+    min-height: 60vh;
+
+    text-align: center;
+
+  }
+
+
+}
+
+
