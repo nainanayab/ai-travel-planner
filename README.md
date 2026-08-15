@@ -1,96 +1,294 @@
-# 🤖 AI Tourism Platform
+# 🤖 AI Tourism Platform — TDCP Bahawalpur
 
-An AI-powered tourism web platform designed to help travelers **discover destinations, plan trips, estimate budgets, book hotels and transport, and interact with an AI travel assistant** from one platform.
+An AI-powered tourism and travel management platform developed to help travelers **discover tourist destinations, plan trips, manage budgets, explore hotels and transport, make bookings, check weather, save favorite places, and interact with an AI travel assistant** from one platform.
 
-> 🚧 **Project Status:** Demo / MVP
-> The current version demonstrates the core architecture and functionality. A production-ready version is planned with improved security, scalability, payments, real-time services, and deployment infrastructure.
+> **Project Status:** Functional MVP / Demo
+> This project demonstrates the core architecture and functionality of an AI-powered tourism platform. It is developed as an educational and demonstration project with scope for future production enhancements.
 
 ---
 
 ## 🌍 Overview
 
-The **AI Tourism Platform** combines traditional tourism services with AI-powered trip planning.
+The **AI Tourism Platform** combines tourism services with AI-assisted travel planning to provide users with a centralized travel experience.
 
-Users can:
+Instead of searching separately for destinations, hotels, transport, weather information, budgets, and travel suggestions, users can access these services through one platform.
 
-* Explore tourist destinations
-* View destination details
-* Search and discover places
-* Create accounts and log in
-* Save favorite destinations
-* Book tourist places
-* Browse hotels
-* Book hotels
-* Browse tourist transport
-* Book transport
-* View their bookings
-* Get AI-powered tourism assistance
-* Generate AI-based trip plans
-* Generate budget-based trip plans
-* Estimate hotel, transport, food, activity, and miscellaneous costs
-* View a day-by-day itinerary
+The current system provides:
 
-The goal is to eventually provide a **complete intelligent travel-planning ecosystem**.
+* Tourist-place discovery
+* Place details and categories
+* Search functionality
+* User registration and login
+* JWT authentication
+* User profiles
+* Wishlist / favorites
+* Reviews
+* Tourist-place bookings
+* Hotel browsing
+* Hotel booking workflow
+* Transport browsing
+* Transport booking
+* AI tourism chat
+* AI trip planning
+* Inside-city trip planning
+* Weather information
+* Budget-based trip planning
+* Food-cost estimation
+* Personalized recommendations
+* Trip management
+* AI-generated itineraries
+* Admin functionality
+
+The overall vision is:
+
+> **Discover → Plan → Budget → Book → Travel**
 
 ---
 
-# ✨ Current Features
+# ✨ Main Features
 
 ## 🗺️ Tourist Places
 
-* Browse tourist destinations
-* View destination information
-* Destination categories
-* Location information
-* Tourist-place details
-* Images for selected destinations
-* Place booking functionality
+Users can explore tourist destinations through the Places module.
+
+### Features
+
+* Browse tourist places
+* Search destinations
+* View place details
+* View destination categories
+* View location information
+* View descriptions
+* Display destination images
+* Book tourist places
+* Add places to wishlist
+* Submit reviews
+
+The platform currently includes tourism data for destinations such as **Bahawalpur** and can be expanded with additional destinations.
 
 ---
 
-## 🏨 Hotel System
+# 🏨 Hotel System
 
-The demo includes:
+The platform includes a hotel module for travelers looking for accommodation.
+
+### Features
 
 * Hotel listing
 * Hotel details
-* Hotel availability information
-* Hotel booking flow
-* Hotel-related API endpoints
+* Hotel location
+* Hotel description
+* Hotel category
+* Hotel rating
+* Hotel pricing
+* Hotel booking workflow
+
+The current hotel system provides the foundation for future improvements such as room management, real-time availability, cancellation, and dynamic pricing.
 
 ---
 
-## 🚌 Transport System
+# 🚌 Transport System
 
-The transport module provides:
+The Transport module provides tourism-related transportation services.
+
+### Features
 
 * Transport listings
 * Vehicle information
-* Company information
+* Transport company information
 * Routes
-* Departure and arrival times
+* Departure times
+* Arrival times
 * Seat availability
 * Price per passenger
-* Transport booking
 * Passenger selection
 * Automatic total-price calculation
-* User transport booking history
+* Transport booking
+* Transport booking history
 
-Example:
+### Example
 
 ```text
-Price per person: Rs. 500
+Price per passenger: Rs. 500
 Passengers: 2
 
 Total:
 Rs. 1,000
 ```
 
+The system also supports the concept of **inside-city sightseeing transport**, including the Double Decker Bus used in the city trip-planning experience.
+
 ---
 
-# 💰 AI Budget Trip Planner
+# 🤖 AI Travel Assistant
 
-The platform currently includes a budget-based trip planning API.
+The platform includes an AI-powered tourism assistant using the **Google Gemini API**.
+
+The assistant can be used for tourism-related questions and travel guidance.
+
+Possible assistance includes:
+
+* Destination information
+* Tourist attractions
+* Travel suggestions
+* Trip planning
+* Budget planning
+* Hotel suggestions
+* Transport suggestions
+* Weather-related guidance
+* General tourism questions
+
+The AI assistant provides a conversational interface alongside the platform's normal tourism services.
+
+---
+
+# 🧠 AI Trip Planner
+
+The AI Trip Planner generates a personalized sightseeing plan based on the user's selected requirements.
+
+Users can select:
+
+* Destination / city
+* Number of days
+* Travel interest / category
+
+The system then uses available tourism data to generate a trip plan.
+
+### Planning Flow
+
+```text
+User
+ │
+ ├── Destination
+ ├── Number of Days
+ └── Travel Interest
+          │
+          ▼
+   AI Trip Planner
+          │
+          ▼
+   Available Places
+          │
+          ▼
+ Selected Destinations
+          │
+          ▼
+   Trip Itinerary
+```
+
+The generated plan can contain:
+
+* Destination
+* Trip duration
+* Selected tourist places
+* Place categories
+* Place descriptions
+* Entry-ticket estimates
+* Transport information
+* Estimated ticket costs
+* Day-by-day itinerary
+
+---
+
+# 🏙️ Inside City Trip Planner
+
+The platform provides a dedicated **Inside City** travel-planning experience.
+
+Currently supported city options include:
+
+* Bahawalpur
+* Lahore
+* Multan
+
+Users can select:
+
+* City
+* Trip duration
+* Travel interest
+
+The system can then:
+
+1. Check current weather
+2. Generate a city trip plan
+3. Select suitable tourist places
+4. Recommend inside-city transport
+5. Estimate ticket costs
+6. Generate an itinerary
+
+### Inside City Flow
+
+```text
+Select City
+     │
+     ▼
+Check Weather
+     │
+     ▼
+Select Duration
+     │
+     ▼
+Select Travel Interest
+     │
+     ▼
+Generate AI Plan
+     │
+     ▼
+Tourist Places
+     │
+     ▼
+Transport
+     │
+     ▼
+Estimated Cost
+     │
+     ▼
+Day-by-Day Itinerary
+```
+
+---
+
+# 🌦️ Weather Integration
+
+Weather information is integrated into the tourism-planning experience.
+
+The current system can display:
+
+* Current temperature
+* Feels-like temperature
+* Weather condition
+* Humidity
+* Wind speed
+* Rain probability
+* Weather indicators
+
+The Inside City planner uses city coordinates to request weather information.
+
+### Weather Flow
+
+```text
+Selected City
+      │
+      ▼
+City Coordinates
+      │
+      ▼
+Weather Service
+      │
+      ▼
+Current Weather
+      │
+ ┌────┼────┬────┐
+ ▼    ▼    ▼    ▼
+Temp Humidity Wind Rain
+```
+
+Future versions can use weather data directly in itinerary optimization and activity recommendations.
+
+---
+
+# 💰 Budget Trip Planner
+
+The platform includes a budget-based trip planning system.
 
 Users can provide:
 
@@ -104,7 +302,7 @@ Users can provide:
 * Food requirement
 * Activities requirement
 
-The system calculates estimated:
+The system estimates:
 
 ```text
 Hotel Cost
@@ -117,96 +315,102 @@ Total Trip Cost
 Remaining Budget
 ```
 
-It also generates a basic day-by-day itinerary using available tourist places.
+The system can also generate a basic day-by-day itinerary using available tourist places.
 
-Example:
+---
+
+## 🍴 Food Budgeting
+
+Food is included as part of the budget-planning concept.
+
+The system can estimate daily meal expenses such as:
 
 ```text
-Destination: Bahawalpur
-Duration: 3 days
-Travelers: 2
-Budget: Rs. 30,000
-
-Estimated Total:
-Rs. 32,100
-
-Status:
-Over Budget
+Breakfast
+Lunch
+Dinner
 ```
 
-> ⚠️ Budget calculations in the demo are estimates. Production development will replace fixed assumptions with real pricing, availability, dynamic data, and better optimization.
+Food costs can be calculated according to:
+
+* Number of travelers
+* Number of days
+* Estimated meal cost
+
+This allows the overall trip estimate to include food alongside accommodation, transport, activities, and other expenses.
+
+> **Note:** Food prices in the MVP are estimates and are not intended to represent live restaurant pricing.
 
 ---
 
-# 🤖 AI Travel Assistant
+# ❤️ Wishlist / Favorites
 
-The project includes an AI chat system designed to help users with tourism-related questions.
+Authenticated users can save tourist destinations for later.
 
-The AI can be extended to assist with:
+### Features
 
-* Destination recommendations
-* Tourist attractions
-* Trip planning
-* Budget planning
-* Hotels
-* Transport
-* Weather
-* Travel suggestions
-* Personalized recommendations
-
-The current implementation uses Google's Gemini API.
-
----
-
-# 🌦️ Weather Integration
-
-The backend includes weather-service integration for tourism planning.
-
-The future production version will use weather information more deeply in AI trip planning.
-
-For example:
-
-```text
-Weather
-   ↓
-Destination suitability
-   ↓
-Activity recommendations
-   ↓
-Daily itinerary
-```
-
----
-
-# ❤️ Wishlist
-
-Authenticated users can:
-
-* Save tourist places
+* Add places to favorites
 * View saved places
-* Manage their wishlist
+* Manage wishlist
+* Use favorites as part of recommendation logic
 
 ---
 
-# 👤 User System
+# ⭐ Reviews
 
-The platform includes:
+The platform includes a review system for tourist places.
+
+Users can provide feedback about destinations.
+
+The review architecture provides a foundation for future improvements such as:
+
+* Ratings
+* Review moderation
+* Verified visits
+* Review analytics
+* AI-assisted recommendations
+
+---
+
+# 👤 User Authentication
+
+The platform includes a complete user account foundation.
+
+### Features
 
 * User registration
 * User login
 * JWT authentication
-* User profiles
+* User profile
+* Protected endpoints
 * Role-based access
-* Admin functionality
-* Protected API endpoints
+* Admin role support
+
+Authenticated users can access services that require user authorization.
+
+---
+
+# 👑 Admin Functionality
+
+The backend contains an administrative module with role-based access support.
+
+The admin architecture can be used for managing:
+
+* Tourist places
+* Users
+* Hotels
+* Transport
+* Bookings
+* Reviews
+* Tourism content
 
 ---
 
 # 📅 Booking System
 
-The demo includes booking functionality for:
+The platform provides booking functionality for multiple tourism services.
 
-### Tourist Places
+## Tourist Place Booking
 
 Users can select:
 
@@ -214,34 +418,87 @@ Users can select:
 * Visit date
 * Number of visitors
 
-### Transport
+---
+
+## Hotel Booking
+
+Users can select a hotel and proceed through the hotel booking workflow.
+
+The current system provides the basic booking architecture.
+
+---
+
+## Transport Booking
 
 Users can select:
 
 * Transport service
 * Number of passengers
 
-The system calculates the total transport cost.
-
-### Hotels
-
-Users can select hotels and proceed through the hotel booking flow.
+The system automatically calculates the total transport price based on the selected passenger count.
 
 ---
 
-# 🧠 Recommendation System
+# 🧭 Recommendation System
 
-The backend contains a recommendation system based on user information such as:
+The platform includes a recommendation module based on available user information.
 
-* Preferences
-* Favorites
+The recommendation system can use:
+
+* User preferences
+* Favorite places
 * Tourism interests
+* Available destinations
 
-The recommendation engine can be expanded significantly in the production version.
+This provides the foundation for more advanced AI personalization in future versions.
 
 ---
 
-# 🏗️ Technology Stack
+# 🗓️ Trip Management
+
+The backend includes trip-management functionality.
+
+The architecture contains modules for:
+
+* Trips
+* Trip stops
+* AI-generated trips
+* Saving AI-generated trips
+
+This allows generated travel plans to be managed as part of the wider tourism platform.
+
+---
+
+# 🏗️ System Architecture
+
+```text
+                         USER
+                           │
+                           ▼
+                 ┌──────────────────┐
+                 │ React + Vite     │
+                 │    Frontend      │
+                 └────────┬─────────┘
+                          │
+                       REST API
+                          │
+                          ▼
+                 ┌──────────────────┐
+                 │ FastAPI Backend  │
+                 └────────┬─────────┘
+                          │
+          ┌───────────────┼────────────────┐
+          │               │                │
+          ▼               ▼                ▼
+   ┌────────────┐  ┌────────────┐  ┌────────────┐
+   │ PostgreSQL │  │ Gemini AI  │  │  Weather   │
+   │ SQLAlchemy │  │    API     │  │  Service   │
+   └────────────┘  └────────────┘  └────────────┘
+```
+
+---
+
+# 🛠️ Technology Stack
 
 ## Frontend
 
@@ -263,10 +520,12 @@ The recommendation engine can be expanded significantly in the production versio
 * SQLAlchemy
 * Pydantic
 * JWT Authentication
+* Passlib / password hashing
 
 ## Database
 
 * PostgreSQL
+* SQLAlchemy ORM
 
 ## AI
 
@@ -274,7 +533,7 @@ The recommendation engine can be expanded significantly in the production versio
 
 ## External Services
 
-* Weather API
+* Weather service / Weather API
 
 ---
 
@@ -294,7 +553,7 @@ AI_TOURISM_PLATFORM/
 │   │   ├── schemas/
 │   │   ├── services/
 │   │   ├── utils/
-│   │   │
+│   │
 │   │   └── main.py
 │   │
 │   ├── static/
@@ -304,6 +563,7 @@ AI_TOURISM_PLATFORM/
 ├── frontend/
 │   │
 │   ├── src/
+│   │   ├── assets/
 │   │   ├── components/
 │   │   ├── context/
 │   │   ├── layout/
@@ -320,36 +580,112 @@ AI_TOURISM_PLATFORM/
 
 ---
 
-# 🔌 Main Backend Modules
+# 🔌 Backend Modules
 
-The backend currently contains modules for:
+The current FastAPI backend contains modular routers for:
 
 ```text
 Users
 Places
+Admin
 Preferences
-Favorites
+AI Chat
 Reviews
+Favorites
 Bookings
 Hotels
-Transport
-Transport Bookings
+Recommendations
 Trips
 Trip Stops
 AI Trips
 AI Trip Saving
-Recommendations
 Weather
-AI Chat
-Budget Trip Planning
-Admin
+Transport
+Transport Bookings
+Budget Trips
+Budget Transport
+```
+
+This modular architecture makes it easier to maintain and extend individual tourism services.
+
+---
+
+# 🔗 Main API Routes
+
+Some of the available API routes include:
+
+```text
+POST   /register
+POST   /login
+
+GET    /places/
+GET    /places/{id}
+
+GET    /hotels/
+GET    /hotels/{id}
+
+GET    /transports/
+
+POST   /transport-bookings/
+GET    /my-transport-bookings
+
+POST   /bookings/
+GET    /my-bookings
+
+POST   /chat
+
+POST   /budget-trip/plan
+
+GET    /recommendations/
+
+GET    /weather/
+
+POST   /ai-trip/plan
+```
+
+The complete API can be explored through FastAPI Swagger documentation.
+
+```text
+http://127.0.0.1:8000/docs
 ```
 
 ---
 
-# 🚀 Running the Project Locally
+# ⚙️ Environment Configuration
 
-## 1. Clone the repository
+Create a `.env` file inside the backend directory.
+
+Example:
+
+```env
+DATABASE_URL=postgresql://postgres:YOUR_PASSWORD@localhost:5432/ai_tourism
+
+GEMINI_API_KEY=YOUR_GEMINI_API_KEY
+
+WEATHER_API_KEY=YOUR_WEATHER_API_KEY
+```
+
+> Never upload real API keys, passwords, JWT secrets, database credentials, or access tokens to GitHub.
+
+---
+
+# 🗄️ PostgreSQL Setup
+
+Create a PostgreSQL database named:
+
+```text
+ai_tourism
+```
+
+The backend uses PostgreSQL through SQLAlchemy ORM.
+
+Make sure PostgreSQL is running before starting the backend.
+
+---
+
+# 🚀 Run the Project Locally
+
+## 1. Clone Repository
 
 ```bash
 git clone YOUR_GITHUB_REPOSITORY_URL
@@ -360,7 +696,7 @@ cd AI_TOURISM_PLATFORM
 
 # 🐍 Backend Setup
 
-Go to the backend:
+Navigate to the backend:
 
 ```bash
 cd backend
@@ -372,7 +708,7 @@ Create a virtual environment:
 python -m venv .venv
 ```
 
-Activate it on Windows:
+Activate it on Windows PowerShell:
 
 ```powershell
 .venv\Scripts\Activate.ps1
@@ -384,35 +720,7 @@ Install dependencies:
 pip install -r requirements.txt
 ```
 
----
-
-# 🗄️ PostgreSQL Setup
-
-Create a PostgreSQL database:
-
-```text
-ai_tourism
-```
-
-The backend expects PostgreSQL to be available locally.
-
-Create a `.env` file inside `backend`:
-
-```env
-DATABASE_URL=postgresql://postgres:YOUR_PASSWORD@localhost:5432/ai_tourism
-
-GEMINI_API_KEY=YOUR_GEMINI_API_KEY
-
-WEATHER_API_KEY=YOUR_WEATHER_API_KEY
-```
-
-> **Never commit `.env` to GitHub.**
-
----
-
-# ▶️ Start Backend
-
-From the `backend` directory:
+Start FastAPI:
 
 ```bash
 uvicorn app.main:app --reload
@@ -424,10 +732,19 @@ Backend:
 http://127.0.0.1:8000
 ```
 
-FastAPI documentation:
+Swagger documentation:
 
 ```text
 http://127.0.0.1:8000/docs
+```
+
+The root endpoint returns:
+
+```json
+{
+  "message": "AI Tourism Platform API is running",
+  "status": "success"
+}
 ```
 
 ---
@@ -436,13 +753,13 @@ http://127.0.0.1:8000/docs
 
 Open another terminal.
 
-Go to frontend:
+Navigate to the frontend:
 
 ```bash
 cd frontend
 ```
 
-Install packages:
+Install dependencies:
 
 ```bash
 npm install
@@ -454,13 +771,13 @@ Start Vite:
 npm run dev
 ```
 
-Frontend:
+Frontend normally runs at:
 
 ```text
 http://localhost:5173
 ```
 
-Depending on your local configuration, Vite may use another available port such as:
+If port `5173` is already in use, Vite may use another available port such as:
 
 ```text
 http://localhost:5174
@@ -468,9 +785,7 @@ http://localhost:5174
 
 ---
 
-# 🔐 Environment Variables
-
-Never upload API keys, passwords, tokens, or database credentials.
+# 🔐 Git Security
 
 Recommended `.gitignore`:
 
@@ -494,7 +809,7 @@ dist/
 .vscode/
 .idea/
 
-# OS
+# Operating System
 .DS_Store
 Thumbs.db
 
@@ -502,336 +817,216 @@ Thumbs.db
 *.log
 ```
 
-Create an example environment file:
+---
 
-```env
-DATABASE_URL=postgresql://postgres:YOUR_PASSWORD@localhost:5432/ai_tourism
-GEMINI_API_KEY=YOUR_GEMINI_API_KEY
-WEATHER_API_KEY=YOUR_WEATHER_API_KEY
-```
+# 📊 Current Project Status
+
+| Module                 | Status            |
+| ---------------------- | ----------------- |
+| React Frontend         | ✅ Implemented     |
+| Vite                   | ✅ Implemented     |
+| FastAPI Backend        | ✅ Implemented     |
+| PostgreSQL             | ✅ Implemented     |
+| SQLAlchemy             | ✅ Implemented     |
+| User Registration      | ✅ Implemented     |
+| User Login             | ✅ Implemented     |
+| JWT Authentication     | ✅ Implemented     |
+| Tourist Places         | ✅ Implemented     |
+| Place Details          | ✅ Implemented     |
+| Wishlist / Favorites   | ✅ Implemented     |
+| Reviews                | ✅ Implemented     |
+| Place Booking          | ✅ Implemented     |
+| Hotels                 | ✅ Implemented     |
+| Hotel Booking          | ✅ Implemented     |
+| Transport              | ✅ Implemented     |
+| Transport Booking      | ✅ Implemented     |
+| AI Chat                | ✅ Implemented     |
+| AI Trip Planner        | ✅ Implemented     |
+| Inside City Planner    | ✅ Implemented     |
+| Weather                | ✅ Implemented     |
+| Budget Trip Planner    | ✅ Implemented     |
+| Food Budget Estimation | ✅ Implemented     |
+| Recommendations        | ✅ Implemented     |
+| Trip Management        | ✅ Implemented     |
+| Admin Module           | ✅ Implemented     |
+| Online Payment         | ❌ Not Implemented |
 
 ---
 
-# 🔗 Important API Routes
+# ⚠️ Current Limitations
 
-Some of the current backend endpoints include:
+The project is currently an MVP/demo system.
 
-```text
-POST   /register
-POST   /login
+Some components may use estimated or development-level data, including:
 
-GET    /places/
-GET    /places/{id}
+* Estimated food prices
+* Estimated ticket prices
+* Limited tourism data
+* Limited hotel inventory
+* Limited transport providers
+* Local development URLs
+* Local PostgreSQL configuration
+* Development-level security configuration
+* No live payment gateway
+* No guaranteed real-time hotel availability
+* No guaranteed real-time transport availability
 
-GET    /hotels/
-GET    /hotels/{id}
-
-GET    /transports/
-
-POST   /transport-bookings/
-
-GET    /my-transport-bookings
-
-POST   /bookings/
-
-GET    /my-bookings
-
-POST   /chat
-
-POST   /budget-trip/plan
-
-GET    /recommendations/
-
-GET    /weather/
-```
-
-The complete API can be explored through:
-
-```text
-/docs
-```
+These limitations are acceptable for the current demonstration stage and can be addressed during future production development.
 
 ---
 
-# 🧮 Budget Planning Architecture
+# 🚧 Future Enhancements
 
-The current demo follows this basic architecture:
+## 🧠 Advanced AI Planning
 
-```text
-User
-  │
-  ├── Destination
-  ├── Days
-  ├── Travelers
-  ├── Budget
-  └── Required Services
-          │
-          ▼
-   Budget Trip API
-          │
-          ├── Places
-          ├── Hotels
-          ├── Transport
-          ├── Food
-          ├── Activities
-          └── Miscellaneous
-          │
-          ▼
-    Cost Calculation
-          │
-          ▼
-    Budget Evaluation
-          │
-          ▼
-    Day-by-Day Trip
-```
+Future improvements may include:
 
----
-
-# 🚧 Production Roadmap
-
-The current repository is a **demo/MVP**, not the final production system.
-
-The next development phase will significantly improve the platform.
-
-## Phase 1 — Production AI Trip Planner
-
-Planned improvements:
-
-* AI-generated complete itineraries
-* Personalized travel plans
-* Budget optimization
-* Hotel selection based on budget
-* Transport selection based on budget
-* Food budget optimization
-* Activity recommendations
-* Weather-aware planning
+* Fully personalized itineraries
+* Advanced route optimization
 * Travel-time calculation
-* Route optimization
-* Day-by-day scheduling
+* Opening-hours awareness
+* Weather-aware planning
+* Better budget optimization
+* Personalized activity recommendations
+* AI-based hotel selection
+* AI-based transport selection
 
 ---
 
-## Phase 2 — Intelligent Budget Engine
+## 🏨 Advanced Hotel System
 
-The budget engine will move from fixed estimates to dynamic calculations.
+Future versions may include:
 
-Instead of:
-
-```text
-Food = Rs. 800 × persons × days
-```
-
-the production system will consider:
-
-```text
-Hotel price
-+
-Transport price
-+
-Food estimates
-+
-Activity prices
-+
-Travel distance
-+
-Number of travelers
-+
-Number of days
-+
-User preferences
-+
-Available budget
-```
-
-The AI will then optimize the trip to fit the user's budget.
-
----
-
-# 🏨 Phase 3 — Advanced Hotel System
-
-Planned:
-
-* Real hotel availability
+* Real-time hotel availability
 * Room types
 * Room capacity
-* Check-in/check-out
 * Dynamic pricing
-* Hotel ratings
-* Reviews
-* Hotel images
-* Booking confirmation
+* Hotel reviews
 * Cancellation
-* Payment integration
+* Booking confirmation
+* External hotel-provider integration
 
 ---
 
-# 🚌 Phase 4 — Advanced Transport System
+## 🚌 Advanced Transport System
 
-Planned:
+Future versions may include:
 
 * Multiple transport providers
 * Real-time seat availability
-* Route optimization
 * Pickup/drop-off locations
-* Transport schedules
+* Advanced route optimization
 * Dynamic pricing
-* Booking confirmation
-* Cancellation
 * Provider management
+* Cancellation
 
 ---
 
-# 💳 Phase 5 — Payment System
+## 💳 Future Payment Integration
 
-Planned payment functionality:
+Online payment functionality is **not included in the current MVP/demo version**.
 
-* Online payments
+If required in a future production version, the platform can be extended with secure payment functionality for:
+
+* Hotel bookings
+* Transport bookings
+* Tourist-place bookings
 * Booking payment status
 * Transaction records
-* Refunds
 * Payment verification
-* Booking confirmation
+* Refund processing
+* Digital payment receipts
+
+The payment system will be considered as a **future enhancement based on project requirements and deployment needs**.
 
 ---
 
-# 🧠 Phase 6 — Advanced AI
+## 🔒 Production Security
 
-Future AI capabilities:
+Before production deployment, the platform can be further improved with:
 
-```text
-User Preferences
-       ↓
-AI Profile
-       ↓
-Destination Recommendation
-       ↓
-Budget Analysis
-       ↓
-Hotel Selection
-       ↓
-Transport Selection
-       ↓
-Activities
-       ↓
-Weather
-       ↓
-Route Optimization
-       ↓
-Complete Trip
-```
-
-The goal is for the AI to function as a **personal travel planner**, rather than simply a chatbot.
-
----
-
-# 🔒 Phase 7 — Production Security
-
-Before production deployment:
-
-* Secure password hashing
-* JWT token improvements
 * Refresh tokens
-* Role-based authorization
-* Input validation
+* Stronger JWT security
 * Rate limiting
-* API security
-* CORS hardening
-* Secret management
-* Database security
-* Error handling
-* Logging
+* Advanced role-based authorization
+* Strict CORS configuration
+* API abuse protection
+* Secure secret management
+* HTTPS
+* Security logging
 * Monitoring
+* Database backups
+* Improved error handling
 
 ---
 
-# ☁️ Phase 8 — Production Deployment
+## ☁️ Production Deployment
 
-Planned deployment architecture:
+A future deployment architecture may use:
 
 ```text
                     Internet
                        │
                        ▼
-                 Frontend
-                React / Vite
+                React Frontend
+                       │
+                     HTTPS
                        │
                        ▼
-                 Backend API
-                    FastAPI
+                FastAPI Backend
                        │
-          ┌────────────┴────────────┐
-          ▼                         ▼
-      PostgreSQL                  AI APIs
-                                  Gemini
-          │
-          ▼
-      External Services
-      Weather / Maps / Payments
+          ┌────────────┼────────────┐
+          ▼            ▼            ▼
+      PostgreSQL    Gemini AI    Weather API
 ```
 
-Production deployment may use:
+Potential production technologies may include:
 
 * Cloud hosting
 * Managed PostgreSQL
+* Docker
 * HTTPS
 * Domain name
 * CI/CD
-* Docker
-* Environment-based configuration
 * Monitoring
-* Backups
-
----
-
-# 📌 Current Limitations
-
-This demo version may contain:
-
-* Estimated rather than real-time prices
-* Basic itinerary generation
-* Limited tourism data
-* Limited hotel/transport availability
-* Development API configuration
-* Local PostgreSQL setup
-* Local frontend/backend URLs
-* Demo-level authentication
-* No production payment gateway
-
-These limitations are intentional because the project is currently being developed incrementally.
+* Automated backups
+* Environment-based configuration
 
 ---
 
 # 🎯 Project Goal
 
-The long-term goal is to build a complete:
+The long-term goal is to create a complete intelligent tourism platform where travelers can manage their journey from discovery to planning and booking.
 
-> **AI-powered intelligent tourism and travel management platform**
-
-where a user can simply say:
+For example:
 
 ```text
 "I have Rs. 50,000.
+
 I want to visit Bahawalpur for 4 days
 with 3 people.
+
 I prefer historical places.
+
 I need a hotel and transport."
 ```
 
-and the system can generate:
+The future system can generate:
 
 ```text
 ┌──────────────────────────────────┐
-│        AI TRAVEL PLAN            │
+│         AI TRAVEL PLAN           │
 ├──────────────────────────────────┤
 │ Destination                      │
 │ Duration                         │
 │ Travelers                        │
+│ Budget                           │
 │                                  │
 │ 🏨 Hotel                         │
-│ 🚌 Transport                    │
+│ 🚌 Transport                     │
 │ 🍴 Food                          │
-│ 🎟 Activities                   │
+│ 🎟 Activities                    │
+│ 🌦 Weather                       │
 │                                  │
 │ 📅 Day 1                         │
 │ 📅 Day 2                         │
@@ -840,67 +1035,118 @@ and the system can generate:
 │                                  │
 │ 💰 Total Cost                    │
 │ 💵 Remaining Budget              │
-│                                  │
-│ ✅ Book Everything               │
 └──────────────────────────────────┘
 ```
 
 ---
 
-# 👩‍💻 Development
+# 🌟 Project Vision
 
-This project is currently under active development.
-
-The architecture is being developed incrementally from:
+The final vision of the platform is:
 
 ```text
-Demo / MVP
-     ↓
-Feature Complete
-     ↓
-Production Architecture
-     ↓
-Security Hardening
-     ↓
+Discover
+    ↓
+Explore
+    ↓
+Plan
+    ↓
+Budget
+    ↓
+Book
+    ↓
+Travel
+```
+
+The platform aims to provide a centralized and intelligent tourism experience for travelers while supporting tourism destinations and services.
+
+---
+
+# 👩‍💻 Development
+
+This project is currently under active development as an AI-powered tourism platform.
+
+The development approach is:
+
+```text
+MVP
+ ↓
+Feature Completion
+ ↓
+UI Polish
+ ↓
 Testing
-     ↓
+ ↓
 Deployment
-     ↓
-Production Release
+ ↓
+Production Improvements
 ```
 
 ---
 
-# ⭐ Future Vision
+# 🤝 Contributing
 
-The final platform will aim to provide:
+For future development:
 
-**Discover → Plan → Budget → Book → Travel**
+1. Fork the repository.
+2. Create a feature branch.
+3. Implement the required changes.
+4. Test the frontend and backend.
+5. Commit the changes.
+6. Push the branch.
+7. Create a pull request.
 
-all from a single intelligent tourism platform.
+Example:
+
+```bash
+git checkout -b feature/new-feature
+
+git add .
+
+git commit -m "Add new tourism feature"
+
+git push origin feature/new-feature
+```
 
 ---
 
-## 📄 License
+# 📄 License
 
-This project is currently intended for educational, demonstration, and development purposes.
+This project is currently intended for:
 
-A final open-source or commercial license will be determined before production release.
+* Educational purposes
+* Internship development
+* Demonstration
+* Research
+* Development
+
+A final open-source or commercial license can be selected before production release.
 
 ---
 
-## 🙌 Acknowledgements
+# 🙌 Acknowledgements
 
-Built using:
+This project is built using:
 
 * React
+* Vite
 * FastAPI
+* Python
 * PostgreSQL
 * SQLAlchemy
+* Pydantic
 * Google Gemini
 * Bootstrap
-* Vite
+* React Router
+* Axios
+* React Icons
+* Framer Motion
 
 ---
 
-**AI Tourism Platform — From tourism discovery to intelligent trip planning.** 🤖🌍
+# 🌍 AI Tourism Platform
+
+### From Tourism Discovery to Intelligent Trip Planning
+
+**Discover → Plan → Budget → Book → Travel** 🤖🌍
+
