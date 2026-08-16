@@ -28,3 +28,18 @@ frontend/dist/
 # OS
 .DS_Store
 Thumbs.db
+
+# Python cache
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Local backups
+*.backup
+

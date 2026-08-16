@@ -1,8 +1,8 @@
-
 import { Outlet } from "react-router-dom";
 
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
+import AIAssistant from "../components/AIAssistant";
 
 function MainLayout() {
   return (
@@ -16,10 +16,10 @@ function MainLayout() {
 
       <Footer />
 
+      <AIAssistant />
+
     </div>
   );
 }
 
 export default MainLayout;
-
-

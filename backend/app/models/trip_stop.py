@@ -41,8 +41,6 @@ class TripStop(Base):
         nullable=True
     )
 
-
-    # Relationship with Place
     place = relationship(
         "Place"
     )

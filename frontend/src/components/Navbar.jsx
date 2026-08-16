@@ -9,9 +9,11 @@ import {
   FaCalendarCheck,
   FaBus,
   FaHome,
-  FaRobot,
   FaMapMarkedAlt,
+  FaMapMarkerAlt,
   FaChevronDown,
+  FaCloudSun,
+  FaSuitcase,
 } from "react-icons/fa";
 
 import { useEffect, useState } from "react";
@@ -38,15 +40,24 @@ function Navbar() {
     window.addEventListener("storage", checkToken);
 
     return () => {
-      window.removeEventListener(
-        "storage",
-        checkToken
-      );
+      window.removeEventListener("storage", checkToken);
     };
   }, []);
 
   // =====================================================
-  // CLOSE USER MENU WHEN ROUTE CHANGES
+  // CHECK TOKEN AFTER LOGIN / LOGOUT
+  // =====================================================
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setToken(localStorage.getItem("token"));
+    }, 500);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  // =====================================================
+  // CLOSE MENU WHEN ROUTE CHANGES
   // =====================================================
 
   useEffect(() => {
@@ -59,8 +70,10 @@ function Navbar() {
 
   const logout = () => {
     localStorage.removeItem("token");
+
     setToken(null);
     setMenuOpen(false);
+
     navigate("/login");
   };
 
@@ -120,6 +133,8 @@ function Navbar() {
 
           <div className="ai-main-nav">
 
+            {/* HOME */}
+
             <Link
               to="/"
               className={`ai-nav-link ${
@@ -128,10 +143,17 @@ function Navbar() {
                   : ""
               }`}
             >
+
               <FaHome />
-              <span>Home</span>
+
+              <span>
+                Home
+              </span>
+
             </Link>
 
+
+            {/* EXPLORE */}
 
             <Link
               to="/places"
@@ -141,10 +163,17 @@ function Navbar() {
                   : ""
               }`}
             >
+
               <FaMapMarkedAlt />
-              <span>Explore</span>
+
+              <span>
+                Explore
+              </span>
+
             </Link>
 
+
+            {/* HOTELS */}
 
             <Link
               to="/hotels"
@@ -154,10 +183,17 @@ function Navbar() {
                   : ""
               }`}
             >
+
               <FaHotel />
-              <span>Hotels</span>
+
+              <span>
+                Hotels
+              </span>
+
             </Link>
 
+
+            {/* TRANSPORT */}
 
             <Link
               to="/transport"
@@ -167,21 +203,53 @@ function Navbar() {
                   : ""
               }`}
             >
+
               <FaBus />
-              <span>Transport</span>
+
+              <span>
+                Transport
+              </span>
+
             </Link>
 
 
+            {/* INSIDE CITY */}
+
             <Link
-              to="/chat"
-              className={`ai-nav-link ai-ai-link ${
-                isActive("/chat")
+              to="/trip-planner"
+              className={`ai-nav-link ${
+                isActive("/trip-planner")
                   ? "ai-nav-active"
                   : ""
               }`}
             >
-              <FaRobot />
-              <span>AI Guide</span>
+
+              <FaMapMarkedAlt />
+
+              <span>
+                Inside City
+              </span>
+
+            </Link>
+
+
+            {/* WEATHER */}
+
+            <Link
+              to="/weather"
+              className={`ai-nav-link ${
+                isActive("/weather")
+                  ? "ai-nav-active"
+                  : ""
+              }`}
+            >
+
+              <FaCloudSun />
+
+              <span>
+                Weather
+              </span>
+
             </Link>
 
           </div>
@@ -194,18 +262,24 @@ function Navbar() {
           <div className="ai-navbar-right">
 
             {token ? (
+
               <>
 
                 {/* =================================================
-                    QUICK BOOKING
+                    BOOK A VISIT
                 ================================================= */}
 
                 <Link
                   to="/booking"
                   className="ai-book-btn"
                 >
+
                   <FaCalendarCheck />
-                  <span>Book a Visit</span>
+
+                  <span>
+                    Book a Visit
+                  </span>
+
                 </Link>
 
 
@@ -219,9 +293,7 @@ function Navbar() {
                     type="button"
                     className="ai-user-button"
                     onClick={() =>
-                      setMenuOpen(
-                        !menuOpen
-                      )
+                      setMenuOpen(!menuOpen)
                     }
                   >
 
@@ -252,6 +324,8 @@ function Navbar() {
 
                     <div className="ai-user-dropdown">
 
+                      {/* HEADER */}
+
                       <div className="ai-dropdown-header">
 
                         <div className="ai-dropdown-avatar">
@@ -259,6 +333,7 @@ function Navbar() {
                         </div>
 
                         <div>
+
                           <strong>
                             My Account
                           </strong>
@@ -266,6 +341,7 @@ function Navbar() {
                           <small>
                             Travel Dashboard
                           </small>
+
                         </div>
 
                       </div>
@@ -274,54 +350,141 @@ function Navbar() {
                       <div className="ai-dropdown-divider" />
 
 
+                      {/* PROFILE */}
+
                       <Link
                         to="/profile"
                         className="ai-dropdown-item"
                       >
+
                         <FaUser />
-                        <span>Profile</span>
+
+                        <span>
+                          Profile
+                        </span>
+
                       </Link>
 
+
+                      {/* WISHLIST */}
 
                       <Link
                         to="/wishlist"
                         className="ai-dropdown-item"
                       >
+
                         <FaHeart />
-                        <span>Wishlist</span>
+
+                        <span>
+                          Wishlist
+                        </span>
+
                       </Link>
 
+
+                      {/* =================================================
+                          MY TRIPS
+                      ================================================= */}
+
+                      <Link
+                        to="/my-trips"
+                        className={`ai-dropdown-item ${
+                          isActive("/my-trips")
+                            ? "ai-dropdown-active"
+                            : ""
+                        }`}
+                      >
+
+                        <FaSuitcase />
+
+                        <span>
+                          My Trips
+                        </span>
+
+                      </Link>
+
+
+                      {/* PLACE BOOKINGS */}
 
                       <Link
                         to="/my-bookings"
                         className="ai-dropdown-item"
                       >
-                        <FaCalendarCheck />
-                        <span>My Bookings</span>
+
+                        <FaMapMarkerAlt />
+
+                        <span>
+                          My Place Bookings
+                        </span>
+
                       </Link>
 
+
+                      {/* HOTEL BOOKINGS */}
+
+                      <Link
+                        to="/my-hotel-bookings"
+                        className="ai-dropdown-item"
+                      >
+
+                        <FaHotel />
+
+                        <span>
+                          My Hotel Bookings
+                        </span>
+
+                      </Link>
+
+
+                      {/* TRANSPORT BOOKINGS */}
 
                       <Link
                         to="/my-transport-bookings"
                         className="ai-dropdown-item"
                       >
+
                         <FaBus />
+
                         <span>
                           My Transport Bookings
                         </span>
+
+                      </Link>
+
+
+                      {/* WEATHER */}
+
+                      <Link
+                        to="/weather"
+                        className="ai-dropdown-item"
+                      >
+
+                        <FaCloudSun />
+
+                        <span>
+                          Weather
+                        </span>
+
                       </Link>
 
 
                       <div className="ai-dropdown-divider" />
 
 
+                      {/* LOGOUT */}
+
                       <button
                         type="button"
                         className="ai-dropdown-logout"
                         onClick={logout}
                       >
+
                         <FaSignOutAlt />
-                        <span>Logout</span>
+
+                        <span>
+                          Logout
+                        </span>
+
                       </button>
 
                     </div>
@@ -331,12 +494,12 @@ function Navbar() {
                 </div>
 
               </>
+
             ) : (
+
               <>
 
-                {/* =================================================
-                    LOGIN
-                ================================================= */}
+                {/* LOGIN */}
 
                 <Link
                   to="/login"
@@ -346,9 +509,7 @@ function Navbar() {
                 </Link>
 
 
-                {/* =================================================
-                    REGISTER
-                ================================================= */}
+                {/* REGISTER */}
 
                 <Link
                   to="/register"
@@ -358,6 +519,7 @@ function Navbar() {
                 </Link>
 
               </>
+
             )}
 
           </div>
@@ -368,7 +530,7 @@ function Navbar() {
 
 
       {/* =================================================
-          NAVBAR STYLES
+          NAVBAR CSS
       ================================================= */}
 
       <style>
@@ -386,7 +548,7 @@ function Navbar() {
             width: 100%;
 
             background:
-              rgba(255, 255, 255, 0.94);
+              rgba(255, 255, 255, 0.96);
 
             backdrop-filter:
               blur(18px);
@@ -398,7 +560,8 @@ function Navbar() {
               1px solid rgba(13, 110, 253, 0.08);
 
             box-shadow:
-              0 4px 24px rgba(15, 23, 42, 0.06);
+              0 4px 24px
+              rgba(15, 23, 42, 0.06);
           }
 
 
@@ -452,6 +615,7 @@ function Navbar() {
             display: flex;
 
             align-items: center;
+
             justify-content: center;
 
             color: white;
@@ -547,6 +711,8 @@ function Navbar() {
 
             transition:
               all 0.2s ease;
+
+            white-space: nowrap;
           }
 
 
@@ -591,23 +757,6 @@ function Navbar() {
 
             background:
               #0d6efd;
-          }
-
-
-          /* =================================================
-             AI GUIDE
-          ================================================= */
-
-          .ai-ai-link {
-            color: #6546d9;
-          }
-
-
-          .ai-ai-link:hover {
-            color: #6546d9;
-
-            background:
-              #f4f0ff;
           }
 
 
@@ -681,7 +830,7 @@ function Navbar() {
 
 
           /* =================================================
-             USER BUTTON
+             USER
           ================================================= */
 
           .ai-user-wrapper {
@@ -728,6 +877,7 @@ function Navbar() {
             display: flex;
 
             align-items: center;
+
             justify-content: center;
 
             color: white;
@@ -771,11 +921,12 @@ function Navbar() {
           .ai-user-dropdown {
             position: absolute;
 
-            top: calc(100% + 10px);
+            top:
+              calc(100% + 10px);
 
             right: 0;
 
-            width: 245px;
+            width: 270px;
 
             padding: 9px;
 
@@ -792,6 +943,10 @@ function Navbar() {
 
             animation:
               aiDropdown 0.18s ease;
+
+            max-height: 80vh;
+
+            overflow-y: auto;
           }
 
 
@@ -814,6 +969,10 @@ function Navbar() {
           }
 
 
+          /* =================================================
+             DROPDOWN HEADER
+          ================================================= */
+
           .ai-dropdown-header {
             display: flex;
 
@@ -834,11 +993,14 @@ function Navbar() {
             display: flex;
 
             align-items: center;
+
             justify-content: center;
 
-            background: #edf4ff;
+            background:
+              #edf4ff;
 
-            color: #0d6efd;
+            color:
+              #0d6efd;
           }
 
 
@@ -862,17 +1024,28 @@ function Navbar() {
           }
 
 
+          /* =================================================
+             DIVIDER
+          ================================================= */
+
           .ai-dropdown-divider {
             height: 1px;
 
-            background: #eef1f5;
+            background:
+              #eef1f5;
 
-            margin: 6px 3px;
+            margin:
+              6px 3px;
           }
 
 
+          /* =================================================
+             DROPDOWN ITEMS
+          ================================================= */
+
           .ai-dropdown-item,
           .ai-dropdown-logout {
+
             width: 100%;
 
             display: flex;
@@ -888,19 +1061,26 @@ function Navbar() {
 
             border: 0;
 
-            background: transparent;
+            background:
+              transparent;
 
-            color: #526071;
+            color:
+              #526071;
 
-            text-decoration: none;
+            text-decoration:
+              none;
 
-            font-size: 12px;
+            font-size:
+              12px;
 
-            font-weight: 600;
+            font-weight:
+              600;
 
-            cursor: pointer;
+            cursor:
+              pointer;
 
-            text-align: left;
+            text-align:
+              left;
 
             transition:
               all 0.15s ease;
@@ -909,31 +1089,77 @@ function Navbar() {
 
           .ai-dropdown-item svg,
           .ai-dropdown-logout svg {
+
             width: 15px;
 
-            color: #718096;
+            color:
+              #718096;
+
+            flex-shrink:
+              0;
           }
 
 
           .ai-dropdown-item:hover {
-            color: #0d6efd;
 
-            background: #f3f7ff;
+            color:
+              #0d6efd;
+
+            background:
+              #f3f7ff;
           }
 
 
+          .ai-dropdown-item:hover svg {
+
+            color:
+              #0d6efd;
+          }
+
+
+          /* =================================================
+             ACTIVE MY TRIPS
+          ================================================= */
+
+          .ai-dropdown-active {
+
+            color:
+              #0d6efd !important;
+
+            background:
+              #edf4ff !important;
+          }
+
+
+          .ai-dropdown-active svg {
+
+            color:
+              #0d6efd !important;
+          }
+
+
+          /* =================================================
+             LOGOUT
+          ================================================= */
+
           .ai-dropdown-logout {
-            color: #dc3545;
+
+            color:
+              #dc3545;
           }
 
 
           .ai-dropdown-logout svg {
-            color: #dc3545;
+
+            color:
+              #dc3545;
           }
 
 
           .ai-dropdown-logout:hover {
-            background: #fff1f2;
+
+            background:
+              #fff1f2;
           }
 
 
@@ -942,18 +1168,24 @@ function Navbar() {
           ================================================= */
 
           .ai-login-btn {
+
             padding:
               9px 16px;
 
-            border-radius: 9px;
+            border-radius:
+              9px;
 
-            color: #475569;
+            color:
+              #475569;
 
-            font-size: 12px;
+            font-size:
+              12px;
 
-            font-weight: 700;
+            font-weight:
+              700;
 
-            text-decoration: none;
+            text-decoration:
+              none;
 
             transition:
               all 0.2s ease;
@@ -961,9 +1193,12 @@ function Navbar() {
 
 
           .ai-login-btn:hover {
-            color: #0d6efd;
 
-            background: #f3f7ff;
+            color:
+              #0d6efd;
+
+            background:
+              #f3f7ff;
           }
 
 
@@ -972,12 +1207,15 @@ function Navbar() {
           ================================================= */
 
           .ai-register-btn {
+
             padding:
               10px 17px;
 
-            border-radius: 10px;
+            border-radius:
+              10px;
 
-            color: white;
+            color:
+              white;
 
             background:
               linear-gradient(
@@ -986,11 +1224,14 @@ function Navbar() {
                 #4f46e5
               );
 
-            font-size: 12px;
+            font-size:
+              12px;
 
-            font-weight: 700;
+            font-weight:
+              700;
 
-            text-decoration: none;
+            text-decoration:
+              none;
 
             box-shadow:
               0 6px 16px
@@ -1002,7 +1243,9 @@ function Navbar() {
 
 
           .ai-register-btn:hover {
-            color: white;
+
+            color:
+              white;
 
             transform:
               translateY(-1px);
@@ -1013,44 +1256,67 @@ function Navbar() {
              TABLET
           ================================================= */
 
-          @media (max-width: 1200px) {
+          @media (max-width: 1250px) {
 
             .ai-navbar-container {
+
               padding:
                 11px 18px;
 
-              gap: 12px;
+              gap:
+                12px;
             }
+
 
             .ai-logo {
-              min-width: auto;
+
+              min-width:
+                auto;
             }
+
 
             .ai-logo-subtitle {
-              display: none;
+
+              display:
+                none;
             }
+
 
             .ai-nav-link {
-              padding:
-                9px 9px;
 
-              font-size: 12px;
+              padding:
+                9px 8px;
+
+              font-size:
+                11px;
             }
+
 
             .ai-nav-link span {
-              display: none;
+
+              display:
+                none;
             }
+
 
             .ai-nav-link svg {
-              font-size: 16px;
+
+              font-size:
+                16px;
             }
+
 
             .ai-navbar-right {
-              min-width: auto;
+
+              min-width:
+                auto;
             }
 
+
             .ai-book-btn span {
-              display: none;
+
+              display:
+                none;
             }
 
           }
@@ -1063,38 +1329,59 @@ function Navbar() {
           @media (max-width: 991px) {
 
             .ai-navbar-container {
-              flex-wrap: wrap;
+
+              flex-wrap:
+                wrap;
             }
 
+
             .ai-main-nav {
-              order: 3;
 
-              width: 100%;
+              order:
+                3;
 
-              justify-content: flex-start;
+              width:
+                100%;
 
-              overflow-x: auto;
+              justify-content:
+                flex-start;
+
+              overflow-x:
+                auto;
 
               padding:
                 5px 0 2px;
 
-              scrollbar-width: none;
+              scrollbar-width:
+                none;
             }
+
 
             .ai-main-nav::-webkit-scrollbar {
-              display: none;
+
+              display:
+                none;
             }
+
 
             .ai-nav-link span {
-              display: inline;
+
+              display:
+                inline;
             }
+
 
             .ai-navbar-right {
-              margin-left: auto;
+
+              margin-left:
+                auto;
             }
 
+
             .ai-user-label {
-              display: none;
+
+              display:
+                none;
             }
 
           }
@@ -1107,31 +1394,50 @@ function Navbar() {
           @media (max-width: 576px) {
 
             .ai-navbar-container {
+
               padding:
                 10px 14px;
             }
 
+
             .ai-logo-title {
-              font-size: 16px;
+
+              font-size:
+                16px;
             }
+
 
             .ai-logo-icon {
-              width: 39px;
-              height: 39px;
+
+              width:
+                39px;
+
+              height:
+                39px;
             }
 
+
             .ai-book-btn {
+
               padding:
                 8px 10px;
             }
 
+
             .ai-register-btn {
+
               padding:
                 9px 12px;
             }
 
+
             .ai-user-dropdown {
-              right: -5px;
+
+              right:
+                -5px;
+
+              width:
+                245px;
             }
 
           }
@@ -1143,6 +1449,3 @@ function Navbar() {
 }
 
 export default Navbar;
-
-
-

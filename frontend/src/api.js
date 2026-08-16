@@ -1,4 +1,3 @@
-
 import axios from "axios";
 
 const API = axios.create({
@@ -17,5 +16,30 @@ API.interceptors.request.use(
   },
   (error) => Promise.reject(error)
 );
+
+
+// =========================================================
+// BUDGET TRANSPORT
+// =========================================================
+
+export const searchAffordableTransport = async (
+  fromCity,
+  toCity,
+  budget
+) => {
+  const response = await API.get(
+    "/budget-transports/search/affordable",
+    {
+      params: {
+        from_city: fromCity,
+        to_city: toCity,
+        budget: budget,
+      },
+    }
+  );
+
+  return response.data;
+};
+
 
 export default API;

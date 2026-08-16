@@ -1,3 +1,4 @@
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
@@ -13,6 +14,7 @@ from app.services.transport_booking_service import (
     create_transport_booking,
     get_user_transport_bookings,
     get_transport_booking,
+    cancel_transport_booking,
 )
 
 from app.utils.auth import get_current_user
@@ -102,6 +104,41 @@ def single_transport_booking(
     """
 
     result = get_transport_booking(
+        db=db,
+        booking_id=booking_id,
+        user_id=current_user.id,
+    )
+
+    if not result:
+        raise HTTPException(
+            status_code=404,
+            detail="Transport booking not found.",
+        )
+
+    return result
+
+
+# =========================================================
+# CANCEL TRANSPORT BOOKING
+# =========================================================
+
+@router.delete(
+    "/{booking_id}",
+    response_model=TransportBookingResponse,
+)
+def cancel_booking(
+    booking_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """
+    Cancel the logged-in user's transport booking.
+
+    The cancelled passengers' seats are restored
+    to the transport service.
+    """
+
+    result = cancel_transport_booking(
         db=db,
         booking_id=booking_id,
         user_id=current_user.id,

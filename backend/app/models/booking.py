@@ -1,3 +1,4 @@
+
 from sqlalchemy import (
     Column,
     Integer,
@@ -6,6 +7,7 @@ from sqlalchemy import (
     String,
     DateTime,
     Float,
+    Boolean,
 )
 
 from sqlalchemy.sql import func
@@ -39,7 +41,7 @@ class Booking(Base):
     )
 
     # =========================================================
-    # PLACE BOOKING
+    # PLACE
     # =========================================================
 
     place_id = Column(
@@ -49,7 +51,7 @@ class Booking(Base):
     )
 
     # =========================================================
-    # HOTEL BOOKING
+    # HOTEL
     # =========================================================
 
     hotel_id = Column(
@@ -59,7 +61,7 @@ class Booking(Base):
     )
 
     # =========================================================
-    # TRANSPORT BOOKING
+    # TRANSPORT
     # =========================================================
 
     transport_id = Column(
@@ -69,7 +71,7 @@ class Booking(Base):
     )
 
     # =========================================================
-    # PLACE VISIT DATE
+    # PLACE DATE
     # =========================================================
 
     visit_date = Column(
@@ -78,7 +80,7 @@ class Booking(Base):
     )
 
     # =========================================================
-    # HOTEL CHECK-IN
+    # HOTEL DATES
     # =========================================================
 
     check_in = Column(
@@ -86,17 +88,13 @@ class Booking(Base):
         nullable=True
     )
 
-    # =========================================================
-    # HOTEL CHECK-OUT
-    # =========================================================
-
     check_out = Column(
         Date,
         nullable=True
     )
 
     # =========================================================
-    # NUMBER OF PERSONS
+    # PEOPLE
     # =========================================================
 
     persons = Column(
@@ -104,18 +102,10 @@ class Booking(Base):
         nullable=True
     )
 
-    # =========================================================
-    # TRANSPORT PASSENGERS
-    # =========================================================
-
     passengers = Column(
         Integer,
         nullable=True
     )
-
-    # =========================================================
-    # NUMBER OF ROOMS
-    # =========================================================
 
     rooms = Column(
         Integer,
@@ -123,7 +113,7 @@ class Booking(Base):
     )
 
     # =========================================================
-    # HOTEL PRICE PER NIGHT
+    # HOTEL PRICE
     # =========================================================
 
     price_per_night = Column(
@@ -131,21 +121,104 @@ class Booking(Base):
         nullable=True
     )
 
-    # =========================================================
-    # NUMBER OF NIGHTS
-    # =========================================================
-
     nights = Column(
         Integer,
         nullable=True
     )
 
-    # =========================================================
-    # TOTAL BOOKING PRICE
-    # =========================================================
-
     total_price = Column(
         Float,
+        nullable=True
+    )
+
+    # =========================================================
+    # PLACE TICKET
+    # =========================================================
+
+    place_ticket_price = Column(
+        Float,
+        nullable=True
+    )
+
+    place_total_price = Column(
+        Float,
+        nullable=True
+    )
+
+    # =========================================================
+    # HOTEL MEAL
+    # =========================================================
+
+    meal_plan = Column(
+        String,
+        nullable=True,
+        default="none",
+        server_default="none"
+    )
+
+    breakfast_selected = Column(
+        Boolean,
+        nullable=False,
+        default=False,
+        server_default="false"
+    )
+
+    dinner_selected = Column(
+        Boolean,
+        nullable=False,
+        default=False,
+        server_default="false"
+    )
+
+    breakfast_price = Column(
+        Float,
+        nullable=True,
+        default=0
+    )
+
+    dinner_price = Column(
+        Float,
+        nullable=True,
+        default=0
+    )
+
+    meal_total_price = Column(
+        Float,
+        nullable=True,
+        default=0
+    )
+
+    # =========================================================
+    # WIFI
+    # =========================================================
+
+    wifi_required = Column(
+        Boolean,
+        nullable=False,
+        default=True,
+        server_default="true"
+    )
+
+    # =========================================================
+    # PAYMENT
+    # =========================================================
+
+    payment_method = Column(
+        String,
+        nullable=False,
+        default="online",
+        server_default="online"
+    )
+
+    payment_status = Column(
+        String,
+        nullable=False,
+        default="pending",
+        server_default="pending"
+    )
+
+    payment_reference = Column(
+        String,
         nullable=True
     )
 
@@ -155,12 +228,13 @@ class Booking(Base):
 
     status = Column(
         String,
+        nullable=False,
         default="Pending",
-        nullable=False
+        server_default="Pending"
     )
 
     # =========================================================
-    # CREATED DATE
+    # CREATED
     # =========================================================
 
     created_at = Column(
@@ -169,7 +243,7 @@ class Booking(Base):
     )
 
     # =========================================================
-    # USER RELATIONSHIP
+    # RELATIONSHIPS
     # =========================================================
 
     user = relationship(
@@ -177,27 +251,15 @@ class Booking(Base):
         foreign_keys=[user_id]
     )
 
-    # =========================================================
-    # PLACE RELATIONSHIP
-    # =========================================================
-
     place = relationship(
         "Place",
         foreign_keys=[place_id]
     )
 
-    # =========================================================
-    # HOTEL RELATIONSHIP
-    # =========================================================
-
     hotel = relationship(
         "Hotel",
         foreign_keys=[hotel_id]
     )
-
-    # =========================================================
-    # TRANSPORT RELATIONSHIP
-    # =========================================================
 
     transport = relationship(
         "Transport",

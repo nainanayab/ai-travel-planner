@@ -1,4 +1,6 @@
 
+import "./App.css";
+
 import { Routes, Route } from "react-router-dom";
 
 import { AuthProvider } from "./context/AuthContext";
@@ -20,21 +22,47 @@ import HotelBooking from "./pages/HotelBooking";
 import Transport from "./pages/Transport";
 import MyTransportBookings from "./pages/MyTransportBookings";
 
+import BudgetTrip from "./pages/BudgetTrip";
+import TripPlanner from "./pages/TripPlanner";
+import Weather from "./pages/Weather";
+
+// =====================================================
+// SAVED TRIPS
+// =====================================================
+
+import MyTrips from "./pages/MyTrips";
+import TripDetails from "./pages/TripDetails";
+
+// =====================================================
+// PAYMENT
+// =====================================================
+
+import Payment from "./pages/Payment";
+
+// =====================================================
+// AUTH
+// =====================================================
+
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 
+// =====================================================
+// BOOKINGS
+// =====================================================
+
 import Booking from "./pages/Booking";
 import MyBookings from "./pages/MyBookings";
+import MyHotelBookings from "./pages/MyHotelBookings";
+
+// =====================================================
+// USER FEATURES
+// =====================================================
 
 import Chat from "./pages/Chat";
 import Wishlist from "./pages/Wishlist";
 import Profile from "./pages/Profile";
 
-// =====================================================
-// AI BUDGET TRIP
-// =====================================================
-
-import BudgetTrip from "./pages/BudgetTrip";
+import NotFound from "./pages/NotFound";
 
 // =====================================================
 // APP
@@ -43,7 +71,6 @@ import BudgetTrip from "./pages/BudgetTrip";
 function App() {
   return (
     <AuthProvider>
-
       <Routes>
 
         {/* =================================================
@@ -89,10 +116,6 @@ function App() {
             element={<HotelDetails />}
           />
 
-          {/* =================================================
-              HOTEL BOOKING
-          ================================================= */}
-
           <Route
             path="/hotel-booking/:id"
             element={<HotelBooking />}
@@ -113,6 +136,66 @@ function App() {
           />
 
           {/* =================================================
+              BUDGET TRIP
+          ================================================= */}
+
+          <Route
+            path="/budget-trip"
+            element={<BudgetTrip />}
+          />
+
+          {/* =================================================
+              INSIDE CITY TRIP PLANNER
+              
+              Flow:
+              City → Select Stops → Generate Plan
+              
+              No city-to-city planning here.
+              No trip duration required.
+          ================================================= */}
+
+          <Route
+            path="/trip-planner"
+            element={<TripPlanner />}
+          />
+
+          {/* =================================================
+              MY SAVED TRIPS
+          ================================================= */}
+
+          <Route
+            path="/my-trips"
+            element={<MyTrips />}
+          />
+
+          {/* =================================================
+              SAVED TRIP DETAILS
+          ================================================= */}
+
+          <Route
+            path="/my-trips/:tripId"
+            element={<TripDetails />}
+          />
+
+          {/* =================================================
+              PAYMENT
+          ================================================= */}
+
+          <Route
+            path="/payment/:tripId"
+            element={<Payment />}
+          />
+
+          {/* =================================================
+              WEATHER
+          ================================================= */}
+
+          <Route
+            path="/weather"
+            element={<Weather />}
+          />
+
+          {/* =================================================
               AUTHENTICATION
           ================================================= */}
 
@@ -127,7 +210,7 @@ function App() {
           />
 
           {/* =================================================
-              PLACE BOOKING
+              PLACE BOOKINGS
           ================================================= */}
 
           <Route
@@ -135,17 +218,22 @@ function App() {
             element={<Booking />}
           />
 
-          {/* =================================================
-              MY BOOKINGS
-          ================================================= */}
-
           <Route
             path="/my-bookings"
             element={<MyBookings />}
           />
 
           {/* =================================================
-              AI CHAT
+              HOTEL BOOKINGS
+          ================================================= */}
+
+          <Route
+            path="/my-hotel-bookings"
+            element={<MyHotelBookings />}
+          />
+
+          {/* =================================================
+              USER FEATURES
           ================================================= */}
 
           <Route
@@ -153,40 +241,30 @@ function App() {
             element={<Chat />}
           />
 
-          {/* =================================================
-              AI BUDGET TRIP
-          ================================================= */}
-
-          <Route
-            path="/budget-trip"
-            element={<BudgetTrip />}
-          />
-
-          {/* =================================================
-              WISHLIST
-          ================================================= */}
-
           <Route
             path="/wishlist"
             element={<Wishlist />}
           />
-
-          {/* =================================================
-              PROFILE
-          ================================================= */}
 
           <Route
             path="/profile"
             element={<Profile />}
           />
 
+          {/* =================================================
+              404
+          ================================================= */}
+
+          <Route
+            path="*"
+            element={<NotFound />}
+          />
+
         </Route>
 
       </Routes>
-
     </AuthProvider>
   );
 }
 
 export default App;
-

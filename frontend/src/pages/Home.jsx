@@ -1,15 +1,14 @@
-
 import { Link } from "react-router-dom";
 
 import {
   FaMapMarkedAlt,
   FaHotel,
-  FaBus,
-  FaRobot,
-  FaHeart,
-  FaUser,
-  FaTicketAlt,
   FaCalendarCheck,
+  FaRobot,
+  FaCheckCircle,
+  FaArrowRight,
+  FaHeart,
+  FaBus,
 } from "react-icons/fa";
 
 import Hero from "../components/Hero";
@@ -18,219 +17,128 @@ function Home() {
   return (
     <>
       {/* =================================================
-          HERO
+          HERO SLIDESHOW
       ================================================= */}
 
       <Hero />
 
 
       {/* =================================================
-          QUICK ACCESS ICON BAR
+          WHY CHOOSE US
       ================================================= */}
 
-      <section className="py-4 bg-light">
+      <section className="why-choose-section py-5">
 
         <div className="container">
 
-          <div className="row g-3 justify-content-center">
+          <div className="text-center mb-5">
 
-            {/* PLACES */}
+            <h2 className="section-title">
+              Why Choose Us?
+            </h2>
 
-            <div className="col-6 col-md-4 col-lg-2">
-              <Link
-                to="/places"
-                className="text-decoration-none"
-              >
-                <div className="card border-0 shadow-sm h-100 text-center">
-                  <div className="card-body py-4">
+            <p className="section-subtitle">
+              Everything you need for a smarter and easier journey
+            </p>
 
-                    <FaMapMarkedAlt
-                      size={32}
-                      className="text-primary mb-2"
-                    />
+          </div>
 
-                    <h6 className="fw-bold mb-0">
-                      Places
-                    </h6>
 
-                  </div>
-                </div>
-              </Link>
+          <div className="row g-4">
+
+            {/* =================================================
+                VERIFIED PLACES
+            ================================================= */}
+
+            <div className="col-md-6 col-lg-3">
+
+              <div className="benefit-card">
+
+                <FaCheckCircle className="benefit-icon" />
+
+                <h5>
+                  Verified Places
+                </h5>
+
+                <p>
+                  Discover carefully selected tourist destinations
+                  and historical places.
+                </p>
+
+              </div>
+
             </div>
 
 
-            {/* HOTELS */}
+            {/* =================================================
+                AI PLANNING
+            ================================================= */}
 
-            <div className="col-6 col-md-4 col-lg-2">
-              <Link
-                to="/hotels"
-                className="text-decoration-none"
-              >
-                <div className="card border-0 shadow-sm h-100 text-center">
-                  <div className="card-body py-4">
+            <div className="col-md-6 col-lg-3">
 
-                    <FaHotel
-                      size={32}
-                      className="text-primary mb-2"
-                    />
+              <div className="benefit-card">
 
-                    <h6 className="fw-bold mb-0">
-                      Hotels
-                    </h6>
+                <FaRobot className="benefit-icon" />
 
-                  </div>
-                </div>
-              </Link>
+                <h5>
+                  AI Powered Planning
+                </h5>
+
+                <p>
+                  Get smart trip suggestions and personalized
+                  travel plans with AI.
+                </p>
+
+              </div>
+
             </div>
 
 
-            {/* TRANSPORT */}
+            {/* =================================================
+                EASY BOOKING
+            ================================================= */}
 
-            <div className="col-6 col-md-4 col-lg-2">
-              <Link
-                to="/transport"
-                className="text-decoration-none"
-              >
-                <div className="card border-0 shadow-sm h-100 text-center">
-                  <div className="card-body py-4">
+            <div className="col-md-6 col-lg-3">
 
-                    <FaBus
-                      size={32}
-                      className="text-primary mb-2"
-                    />
+              <div className="benefit-card">
 
-                    <h6 className="fw-bold mb-0">
-                      Transport
-                    </h6>
+                <FaCalendarCheck className="benefit-icon" />
 
-                  </div>
-                </div>
-              </Link>
+                <h5>
+                  Easy Booking
+                </h5>
+
+                <p>
+                  Manage your tourism bookings easily from one
+                  convenient platform.
+                </p>
+
+              </div>
+
             </div>
 
 
-            {/* BOOKING */}
+            {/* =================================================
+                FAVORITES
+            ================================================= */}
 
-            <div className="col-6 col-md-4 col-lg-2">
-              <Link
-                to="/booking"
-                className="text-decoration-none"
-              >
-                <div className="card border-0 shadow-sm h-100 text-center">
-                  <div className="card-body py-4">
+            <div className="col-md-6 col-lg-3">
 
-                    <FaTicketAlt
-                      size={32}
-                      className="text-primary mb-2"
-                    />
+              <div className="benefit-card">
 
-                    <h6 className="fw-bold mb-0">
-                      Booking
-                    </h6>
+                <FaHeart className="benefit-icon" />
 
-                  </div>
-                </div>
-              </Link>
-            </div>
+                <h5>
+                  Save Favorites
+                </h5>
 
+                <p>
+                  Keep your favorite destinations saved and
+                  access them anytime.
+                </p>
 
-            {/* MY BOOKINGS */}
+              </div>
 
-            <div className="col-6 col-md-4 col-lg-2">
-              <Link
-                to="/my-bookings"
-                className="text-decoration-none"
-              >
-                <div className="card border-0 shadow-sm h-100 text-center">
-                  <div className="card-body py-4">
-
-                    <FaCalendarCheck
-                      size={32}
-                      className="text-success mb-2"
-                    />
-
-                    <h6 className="fw-bold mb-0">
-                      My Bookings
-                    </h6>
-
-                  </div>
-                </div>
-              </Link>
-            </div>
-
-
-            {/* AI CHAT */}
-
-            <div className="col-6 col-md-4 col-lg-2">
-              <Link
-                to="/chat"
-                className="text-decoration-none"
-              >
-                <div className="card border-0 shadow-sm h-100 text-center">
-                  <div className="card-body py-4">
-
-                    <FaRobot
-                      size={32}
-                      className="text-primary mb-2"
-                    />
-
-                    <h6 className="fw-bold mb-0">
-                      AI Chat
-                    </h6>
-
-                  </div>
-                </div>
-              </Link>
-            </div>
-
-
-            {/* WISHLIST */}
-
-            <div className="col-6 col-md-4 col-lg-2">
-              <Link
-                to="/wishlist"
-                className="text-decoration-none"
-              >
-                <div className="card border-0 shadow-sm h-100 text-center">
-                  <div className="card-body py-4">
-
-                    <FaHeart
-                      size={32}
-                      className="text-danger mb-2"
-                    />
-
-                    <h6 className="fw-bold mb-0">
-                      Wishlist
-                    </h6>
-
-                  </div>
-                </div>
-              </Link>
-            </div>
-
-
-            {/* PROFILE */}
-
-            <div className="col-6 col-md-4 col-lg-2">
-              <Link
-                to="/profile"
-                className="text-decoration-none"
-              >
-                <div className="card border-0 shadow-sm h-100 text-center">
-                  <div className="card-body py-4">
-
-                    <FaUser
-                      size={32}
-                      className="text-primary mb-2"
-                    />
-
-                    <h6 className="fw-bold mb-0">
-                      Profile
-                    </h6>
-
-                  </div>
-                </div>
-              </Link>
             </div>
 
           </div>
@@ -241,23 +149,195 @@ function Home() {
 
 
       {/* =================================================
-          WELCOME SECTION
+          OUR SERVICES
       ================================================= */}
 
-      <section className="py-5">
+      <section className="services-section py-5">
 
-        <div className="container text-center">
+        <div className="container">
 
-          <h2 className="fw-bold mb-3">
-            Welcome to AI Tourism Platform
-          </h2>
+          <div className="text-center mb-5">
 
-          <p className="lead text-muted">
-            Discover amazing destinations,
-            explore historical places,
-            plan your journey, and get
-            AI-powered travel assistance.
-          </p>
+            <h2 className="section-title">
+              Our Services
+            </h2>
+
+            <p className="section-subtitle">
+              Explore, plan and manage your journey with ease
+            </p>
+
+          </div>
+
+
+          <div className="row g-4 justify-content-center">
+
+
+            {/* =================================================
+                PLACES
+            ================================================= */}
+
+            <div className="col-md-6 col-lg-4">
+
+              <div className="service-card">
+
+                <div className="service-icon">
+                  <FaMapMarkedAlt />
+                </div>
+
+                <h4>
+                  Places
+                </h4>
+
+                <p>
+                  Explore beautiful historical and tourist
+                  destinations.
+                </p>
+
+                <Link
+                  to="/places"
+                  className="service-btn"
+                >
+                  Explore Places <FaArrowRight />
+                </Link>
+
+              </div>
+
+            </div>
+
+
+            {/* =================================================
+                HOTELS
+            ================================================= */}
+
+            <div className="col-md-6 col-lg-4">
+
+              <div className="service-card">
+
+                <div className="service-icon">
+                  <FaHotel />
+                </div>
+
+                <h4>
+                  Hotels
+                </h4>
+
+                <p>
+                  Find suitable hotels for a comfortable stay
+                  during your journey.
+                </p>
+
+                <Link
+                  to="/hotels"
+                  className="service-btn"
+                >
+                  Find Hotels <FaArrowRight />
+                </Link>
+
+              </div>
+
+            </div>
+
+
+            {/* =================================================
+                TRANSPORT
+            ================================================= */}
+
+            <div className="col-md-6 col-lg-4">
+
+              <div className="service-card">
+
+                <div className="service-icon">
+                  <FaBus />
+                </div>
+
+                <h4>
+                  Transport
+                </h4>
+
+                <p>
+                  Find convenient transport options and plan
+                  your journey comfortably.
+                </p>
+
+                <Link
+                  to="/transport"
+                  className="service-btn"
+                >
+                  Find Transport <FaArrowRight />
+                </Link>
+
+              </div>
+
+            </div>
+
+
+            {/* =================================================
+                BOOKINGS
+            ================================================= */}
+
+            <div className="col-md-6 col-lg-4">
+
+              <div className="service-card">
+
+                <div className="service-icon">
+                  <FaCalendarCheck />
+                </div>
+
+                <h4>
+                  Bookings
+                </h4>
+
+                <p>
+                  Book your selected tourist places and manage
+                  your travel bookings.
+                </p>
+
+                <Link
+                  to="/booking"
+                  className="service-btn"
+                >
+                  Book Now <FaArrowRight />
+                </Link>
+
+              </div>
+
+            </div>
+
+
+            {/* =================================================
+                AI TRIP PLANNER
+            ================================================= */}
+
+            <div className="col-md-6 col-lg-4">
+
+              <div className="service-card">
+
+                <div className="service-icon">
+                  <FaRobot />
+                </div>
+
+                <h4>
+                  AI Trip Planner
+                </h4>
+
+                <p>
+                  Create a smart personalized trip plan according
+                  to your needs.
+                </p>
+
+                <Link
+                  to="/budget-trip"
+                  className="service-btn"
+                >
+                  Plan Trip <FaArrowRight />
+                </Link>
+
+              </div>
+
+            </div>
+
+
+          </div>
 
         </div>
 
@@ -268,4 +348,3 @@ function Home() {
 }
 
 export default Home;
-

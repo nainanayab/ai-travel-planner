@@ -14,7 +14,6 @@ class TripStopCreate(BaseModel):
     order_number: int | None = None
 
 
-
 class PlaceInfo(BaseModel):
 
     id: int
@@ -25,10 +24,8 @@ class PlaceInfo(BaseModel):
 
     category: str | None = None
 
-
     class Config:
         from_attributes = True
-
 
 
 class TripStopResponse(BaseModel):
@@ -42,7 +39,6 @@ class TripStopResponse(BaseModel):
     order_number: int | None = None
 
     place: PlaceInfo
-
 
     class Config:
         from_attributes = True

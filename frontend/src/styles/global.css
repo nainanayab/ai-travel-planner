@@ -1,34 +1,153 @@
+/* =========================================================
+   GLOBAL STYLES
+========================================================= */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
 html {
   scroll-behavior: smooth;
 }
 
-body {
-  margin: 0;
-  padding: 0;
-  font-family: Arial, Helvetica, sans-serif;
-  background-color: #f8f9fa;
-  color: #212529;
+html,
+body,
+#root {
+  width: 100%;
+  min-height: 100%;
 }
+
+body {
+  font-family:
+    "Segoe UI",
+    Arial,
+    Helvetica,
+    sans-serif;
+
+  background-color: #f5f7f6;
+  color: #212529;
+
+  overflow-x: hidden;
+}
+
+
+/* =========================================================
+   LINKS
+========================================================= */
 
 a {
   text-decoration: none;
+  color: inherit;
 }
 
-.app-container {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
+a:hover {
+  text-decoration: none;
 }
 
-.main-content {
-  flex: 1;
+
+/* =========================================================
+   LISTS
+========================================================= */
+
+ul,
+ol {
+  list-style: none;
+  padding: 0;
+  margin: 0;
 }
+
+
+/* =========================================================
+   IMAGES
+========================================================= */
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+
+/* =========================================================
+   BUTTONS
+========================================================= */
+
+button {
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.btn {
+  transition: all 0.3s ease;
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+}
+
+
+/* =========================================================
+   CARDS
+========================================================= */
 
 .card {
+  border: none;
   border-radius: 12px;
+  overflow: hidden;
 }
 
-button,
-.btn {
-  border-radius: 8px;
+.card img {
+  object-fit: cover;
+}
+
+
+/* =========================================================
+   NAVBAR
+========================================================= */
+
+.navbar {
+  padding: 12px 0;
+  position: relative;
+  z-index: 100;
+}
+
+.navbar-brand {
+  font-size: 1.4rem;
+}
+
+
+/* =========================================================
+   FOOTER
+========================================================= */
+
+footer {
+  margin-top: 0;
+  position: relative;
+  z-index: 5;
+}
+
+footer a:hover {
+  color: #0d6efd;
+}
+
+
+/* =========================================================
+   MAIN CONTENT
+========================================================= */
+
+.main-content {
+  width: 100%;
+  position: relative;
+}
+
+
+/* =========================================================
+   RESPONSIVE GLOBAL
+========================================================= */
+
+@media (max-width: 768px) {
+  body {
+    overflow-x: hidden;
+  }
 }

@@ -1,124 +1,269 @@
+
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
+const slides = [
+  {
+    image: "http://127.0.0.1:8000/static/images/noor-mahal.jpg",
+    title: "Discover Bahawalpur",
+    subtitle: "Explore Beautiful Places",
+    description:
+      "Discover the beauty, history, and culture of Bahawalpur with amazing places to visit.",
+  },
+
+  {
+    image: "http://127.0.0.1:8000/static/images/lahore-fort.jpg",
+    title: "Explore Bahawalpur",
+    subtitle: "History & Heritage",
+    description:
+      "Explore historical landmarks, royal architecture, and the rich heritage of Bahawalpur.",
+  },
+
+  {
+    image: "http://127.0.0.1:8000/static/images/multan-fort.jpg",
+    title: "Experience Culture & History",
+    subtitle: "Discover Bahawalpur's Heritage",
+    description:
+      "Visit beautiful historical places and experience the culture and traditions of Bahawalpur.",
+  },
+
+  {
+    image: "http://127.0.0.1:8000/static/images/double-decker.jpg",
+    title: "Travel Around Bahawalpur",
+    subtitle: "Explore the City by Double-Decker Bus",
+    description:
+      "Enjoy convenient city transportation and explore Bahawalpur's beautiful places with the Double-Decker Bus.",
+  },
+];
 
 function Hero() {
+  const [currentSlide, setCurrentSlide] = useState(0);
+
+  /* =====================================================
+     AUTOMATIC SLIDESHOW
+  ===================================================== */
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % slides.length);
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  /* =====================================================
+     NEXT SLIDE
+  ===================================================== */
+
+  const nextSlide = () => {
+    setCurrentSlide((prev) => (prev + 1) % slides.length);
+  };
+
+  /* =====================================================
+     PREVIOUS SLIDE
+  ===================================================== */
+
+  const previousSlide = () => {
+    setCurrentSlide(
+      (prev) => (prev - 1 + slides.length) % slides.length
+    );
+  };
+
+  const slide = slides[currentSlide];
 
   return (
+    <section className="hero-section">
 
-    <section className="bg-primary text-white py-5">
+      {/* =================================================
+          BACKGROUND IMAGE
+      ================================================= */}
 
+      <img
+        src={slide.image}
+        alt={slide.title}
+        className="hero-background-image"
+      />
 
-      <div className="container">
+      {/* =================================================
+          DARK OVERLAY
+      ================================================= */}
 
+      <div className="hero-overlay"></div>
+
+      {/* =================================================
+          HERO CONTENT
+      ================================================= */}
+
+      <div className="container hero-content">
 
         <div className="row align-items-center">
 
+          <div className="col-lg-9 text-center text-lg-start">
 
-          {/* Hero Text */}
+            {/* =================================================
+                TITLE
+            ================================================= */}
 
-          <div className="col-lg-7 text-center text-lg-start">
-
-
-            <h1 className="display-4 fw-bold mb-3">
-
-              Explore Pakistan with AI
-
+            <h1 className="display-3 fw-bold mb-3">
+              {slide.title}
             </h1>
 
+            {/* =================================================
+                SUBTITLE
+            ================================================= */}
 
+            <h2 className="fw-semibold mb-4">
+              {slide.subtitle}
+            </h2>
 
-            <p className="lead mb-4">
+            {/* =================================================
+                DESCRIPTION
+            ================================================= */}
 
-              Discover beautiful destinations,
-              explore historical places,
-              plan your trips, and get
-              AI-powered travel recommendations.
-
+            <p className="lead mb-4 hero-description">
+              {slide.description}
             </p>
 
+            {/* =================================================
+                TRIP PLANNER OPTIONS
+            ================================================= */}
+
+            <div className="hero-planner">
+
+              <p className="hero-planner-title">
+                Plan Your Journey
+              </p>
+
+              <div className="hero-planner-buttons">
+
+                {/* INSIDE CITY */}
+
+                <Link
+                  to="/trip-planner"
+                  className="hero-planner-btn"
+                >
+                  <span className="planner-btn-icon">
+                    🗺️
+                  </span>
+
+                  <span className="planner-btn-content">
+                    <strong>
+                      Inside City
+                    </strong>
+
+                    <small>
+                      Explore places within a city
+                    </small>
+                  </span>
+
+                  <span className="planner-arrow">
+                    →
+                  </span>
+                </Link>
 
 
+                {/* CITY TO CITY */}
 
-            <div className="d-flex gap-3 justify-content-center justify-content-lg-start flex-wrap">
+                <Link
+                  to="/budget-trip"
+                  className="hero-planner-btn"
+                >
+                  <span className="planner-btn-icon">
+                    🚗
+                  </span>
 
+                  <span className="planner-btn-content">
+                    <strong>
+                      City to City
+                    </strong>
+
+                    <small>
+                      Plan your journey between cities
+                    </small>
+                  </span>
+
+                  <span className="planner-arrow">
+                    →
+                  </span>
+                </Link>
+
+              </div>
+
+            </div>
+
+
+            {/* =================================================
+                EXPLORE PLACES
+            ================================================= */}
+
+            <div className="hero-explore-button">
 
               <Link
-
                 to="/places"
-
                 className="btn btn-light btn-lg px-4"
-
               >
-
                 Explore Places
-
               </Link>
-
-
-
-
-              <Link
-
-                to="/chat"
-
-                className="btn btn-outline-light btn-lg px-4"
-
-              >
-
-                🤖 Plan Your Trip
-
-              </Link>
-
-
 
             </div>
 
-
-
           </div>
-
-
-
-
-
-          {/* Hero Visual */}
-
-
-          <div className="col-lg-5 text-center mt-4 mt-lg-0">
-
-
-            <div className="display-1">
-
-              🕌
-
-            </div>
-
-
-
-            <h3 className="mt-3">
-
-              Discover. Explore. Travel.
-
-            </h3>
-
-
-
-          </div>
-
-
 
         </div>
-
 
       </div>
 
 
+      {/* =================================================
+          PREVIOUS SLIDE
+      ================================================= */}
+
+      <button
+        type="button"
+        className="hero-arrow hero-arrow-left"
+        onClick={previousSlide}
+        aria-label="Previous slide"
+      >
+        ❮
+      </button>
+
+
+      {/* =================================================
+          NEXT SLIDE
+      ================================================= */}
+
+      <button
+        type="button"
+        className="hero-arrow hero-arrow-right"
+        onClick={nextSlide}
+        aria-label="Next slide"
+      >
+        ❯
+      </button>
+
+
+      {/* =================================================
+          SLIDE DOTS
+      ================================================= */}
+
+      <div className="hero-dots">
+
+        {slides.map((_, index) => (
+          <button
+            key={index}
+            type="button"
+            className={`hero-dot ${
+              currentSlide === index ? "active" : ""
+            }`}
+            onClick={() => setCurrentSlide(index)}
+            aria-label={`Go to slide ${index + 1}`}
+          />
+        ))}
+
+      </div>
+
     </section>
-
-
   );
-
 }
-
 
 export default Hero;

@@ -46,6 +46,16 @@ class Place(Base):
         nullable=True
     )
 
+    # ==========================================
+    # TICKET PRICE
+    # ==========================================
+
+    ticket_price = Column(
+        Float,
+        default=0,
+        nullable=False
+    )
+
     created_at = Column(
         DateTime(timezone=True),
         server_default=func.now()

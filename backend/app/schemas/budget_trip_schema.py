@@ -1,3 +1,4 @@
+from typing import Literal
 
 from pydantic import BaseModel, Field
 
@@ -15,29 +16,27 @@ class BudgetTripRequest(BaseModel):
     location: str = Field(
         ...,
         min_length=2,
-        description="Tourist destination"
+        description="Destination city or location",
     )
 
     # -----------------------------------------------------
-    # TRIP DURATION
+    # NUMBER OF DAYS
     # -----------------------------------------------------
 
     days: int = Field(
         ...,
         ge=1,
-        le=30,
-        description="Number of travel days"
+        description="Number of travel days",
     )
 
     # -----------------------------------------------------
-    # TRAVELERS
+    # NUMBER OF TRAVELERS
     # -----------------------------------------------------
 
     persons: int = Field(
-        default=1,
+        ...,
         ge=1,
-        le=50,
-        description="Number of travelers"
+        description="Number of travelers",
     )
 
     # -----------------------------------------------------
@@ -47,20 +46,34 @@ class BudgetTripRequest(BaseModel):
     budget: float = Field(
         ...,
         ge=0,
-        description="Total trip budget in PKR"
+        description="Total available budget",
+    )
+
+    # -----------------------------------------------------
+    # STARTING CITY
+    # -----------------------------------------------------
+
+    from_city: str = Field(
+        ...,
+        min_length=2,
+        description="City from which the trip starts",
     )
 
     # -----------------------------------------------------
     # TRAVEL STYLE
     # -----------------------------------------------------
 
-    travel_style: str = Field(
-        default="Budget",
-        description="Budget, Standard or Luxury"
+    travel_style: Literal[
+        "budget",
+        "standard",
+        "luxury",
+    ] = Field(
+        default="budget",
+        description="Travel style",
     )
 
     # -----------------------------------------------------
-    # INCLUDE SERVICES
+    # OPTIONAL SERVICES
     # -----------------------------------------------------
 
     include_hotel: bool = True
@@ -91,35 +104,77 @@ class BudgetTripResponse(BaseModel):
     budget: float
 
     # -----------------------------------------------------
-    # BUDGET BREAKDOWN
+    # HOTEL INFORMATION
     # -----------------------------------------------------
 
-    hotel_cost: float
+    hotel_name: str | None = None
 
-    transport_cost: float
+    breakfast_included: bool = False
 
-    food_cost: float
+    dinner_included: bool = False
 
-    activities_cost: float
-
-    miscellaneous_cost: float
+    wifi_included: bool = False
 
     # -----------------------------------------------------
-    # TOTAL
+    # HOTEL COST
     # -----------------------------------------------------
 
-    total_cost: float
-
-    remaining_budget: float
+    hotel_cost: float = 0
 
     # -----------------------------------------------------
-    # STATUS
+    # TRANSPORT COST
+    # -----------------------------------------------------
+
+    transport_cost: float = 0
+
+    # -----------------------------------------------------
+    # ALL TRANSPORT OPTIONS
+    # -----------------------------------------------------
+
+    transport_options: list[dict] = Field(
+        default_factory=list
+    )
+
+    # -----------------------------------------------------
+    # FOOD COST
+    # -----------------------------------------------------
+
+    food_cost: float = 0
+
+    # -----------------------------------------------------
+    # ACTIVITIES COST
+    # -----------------------------------------------------
+
+    activities_cost: float = 0
+
+    # -----------------------------------------------------
+    # MISCELLANEOUS COST
+    # -----------------------------------------------------
+
+    miscellaneous_cost: float = 0
+
+    # -----------------------------------------------------
+    # TOTAL COST
+    # -----------------------------------------------------
+
+    total_cost: float = 0
+
+    # -----------------------------------------------------
+    # REMAINING BUDGET
+    # -----------------------------------------------------
+
+    remaining_budget: float = 0
+
+    # -----------------------------------------------------
+    # BUDGET STATUS
     # -----------------------------------------------------
 
     budget_status: str
 
     # -----------------------------------------------------
-    # AI-GENERATED ITINERARY
+    # DAY-BY-DAY ITINERARY
     # -----------------------------------------------------
 
-    itinerary: list
+    itinerary: list[dict] = Field(
+        default_factory=list
+    )

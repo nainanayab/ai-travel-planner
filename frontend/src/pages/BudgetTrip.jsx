@@ -1,450 +1,3039 @@
+import { useMemo, useState } from "react";
+import axios from "axios";
 
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import {
+  FaMapMarkerAlt,
+  FaCalendarAlt,
+  FaUsers,
+  FaMoneyBillWave,
+  FaBus,
+  FaHotel,
+  FaUtensils,
+  FaTicketAlt,
+  FaPlusCircle,
+  FaRobot,
+  FaRoute,
+  FaCalculator,
+  FaArrowRight,
+  FaCheckCircle,
+  FaSearch,
+  FaSpinner,
+  FaExclamationTriangle,
+} from "react-icons/fa";
 
-import API from "../api";
+const API = "http://127.0.0.1:8000";
+
+const AI_BUDGET_TRIP_ENDPOINT = `${API}/budget-trip/plan`;
+
+/* ============================================================
+   ALLOWED CITIES
+============================================================ */
+
+const CITIES = ["Bahawalpur", "Lahore", "Multan"];
+
+
+/* ============================================================
+   MAIN COMPONENT
+============================================================ */
 
 function BudgetTrip() {
-  const navigate = useNavigate();
+
+  /* =========================================================
+     FORM
+  ========================================================= */
 
   const [form, setForm] = useState({
-    location: "",
+    fromCity: "Bahawalpur",
+    destination: "",
     days: 3,
-    persons: 2,
-    budget: 30000,
-    travel_style: "Budget",
-    include_hotel: true,
-    include_transport: true,
-    include_food: true,
-    include_activities: true,
+    passengers: 2,
+    budget: "",
+
+    transport: 0,
+    hotel: 0,
+    food: 0,
+    activities: 0,
+    other: 0,
   });
 
-  const [result, setResult] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
 
-  // =====================================================
-  // HANDLE INPUT
-  // =====================================================
+  /* =========================================================
+     PLAN
+  ========================================================= */
 
-  const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
+  const [planned, setPlanned] = useState(false);
+  const [tripPlan, setTripPlan] = useState([]);
 
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiError, setAiError] = useState("");
+
+
+  /* =========================================================
+     FOOD BUDGET
+  ========================================================= */
+
+  const [foodBreakdown, setFoodBreakdown] = useState({
+    breakfast: 0,
+    lunch: 0,
+    dinner: 0,
+    total: 0,
+    breakfastIncluded: false,
+    dinnerIncluded: false,
+  });
+
+
+  /* =========================================================
+     TRANSPORT
+  ========================================================= */
+
+  const [transportResults, setTransportResults] = useState([]);
+  const [transportLoading, setTransportLoading] = useState(false);
+  const [transportSearched, setTransportSearched] = useState(false);
+  const [selectedTransport, setSelectedTransport] = useState(null);
+  const [transportError, setTransportError] = useState("");
+
+
+  /* =========================================================
+     HOTEL
+  ========================================================= */
+
+  const [hotelResults, setHotelResults] = useState([]);
+  const [hotelLoading, setHotelLoading] = useState(false);
+  const [hotelSearched, setHotelSearched] = useState(false);
+  const [selectedHotel, setSelectedHotel] = useState(null);
+  const [hotelError, setHotelError] = useState("");
+
+
+  /* =========================================================
+     UPDATE FORM
+  ========================================================= */
+
+  const updateField = (field, value) => {
     setForm((previous) => ({
       ...previous,
-      [name]: type === "checkbox" ? checked : value,
+      [field]: value,
     }));
-
-    setError("");
   };
 
-  // =====================================================
-  // CREATE BUDGET TRIP
-  // =====================================================
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  /* =========================================================
+     TOTAL COST
+  ========================================================= */
 
-    const token = localStorage.getItem("token");
+  const totalCost = useMemo(() => {
+    return (
+      Number(form.transport || 0) +
+      Number(form.hotel || 0) +
+      Number(form.food || 0) +
+      Number(form.activities || 0) +
+      Number(form.other || 0)
+    );
+  }, [
+    form.transport,
+    form.hotel,
+    form.food,
+    form.activities,
+    form.other,
+  ]);
 
-    if (!token) {
-      setError("Please login first to create your AI trip plan.");
 
-      setTimeout(() => {
-        navigate("/login");
-      }, 1000);
+  /* =========================================================
+     PER PERSON
+  ========================================================= */
 
-      return;
+  const perPerson = useMemo(() => {
+    const persons = Number(form.passengers || 0);
+
+    if (persons <= 0) {
+      return 0;
     }
 
-    if (!form.location.trim()) {
-      setError("Please enter a destination.");
-      return;
+    return Math.round(totalCost / persons);
+  }, [totalCost, form.passengers]);
+
+
+  /* =========================================================
+     DAILY COST
+  ========================================================= */
+
+  const dailyCost = useMemo(() => {
+    const days = Number(form.days || 0);
+
+    if (days <= 0) {
+      return 0;
     }
 
-    if (Number(form.days) < 1) {
-      setError("Trip must be at least 1 day.");
-      return;
+    return Math.round(totalCost / days);
+  }, [totalCost, form.days]);
+
+
+  /* =========================================================
+     REMAINING BUDGET
+  ========================================================= */
+
+  const remainingBudget = useMemo(() => {
+    return Number(form.budget || 0) - totalCost;
+  }, [form.budget, totalCost]);
+
+
+  /* =========================================================
+     BUDGET STATUS
+  ========================================================= */
+
+  const budgetStatus = useMemo(() => {
+
+    if (!form.budget) {
+      return {
+        text: "Enter your total budget to compare your trip cost.",
+        className: "neutral",
+      };
     }
 
-    if (Number(form.persons) < 1) {
-      setError("Please enter at least 1 traveler.");
-      return;
+    if (remainingBudget >= 0) {
+      return {
+        text: `You are within budget by PKR ${remainingBudget.toLocaleString()}.`,
+        className: "success",
+      };
     }
 
-    if (Number(form.budget) <= 0) {
-      setError("Please enter a valid budget.");
-      return;
+    return {
+      text: `Your estimated trip is PKR ${Math.abs(
+        remainingBudget
+      ).toLocaleString()} over budget.`,
+      className: "danger",
+    };
+
+  }, [form.budget, remainingBudget]);
+
+
+  /* =========================================================
+     NORMALIZE API RESPONSE
+  ========================================================= */
+
+  const normalizeResponse = (data) => {
+
+    if (Array.isArray(data)) {
+      return data;
     }
+
+    if (Array.isArray(data?.items)) {
+      return data.items;
+    }
+
+    if (Array.isArray(data?.results)) {
+      return data.results;
+    }
+
+    if (Array.isArray(data?.data)) {
+      return data.data;
+    }
+
+    if (Array.isArray(data?.transports)) {
+      return data.transports;
+    }
+
+    if (Array.isArray(data?.hotels)) {
+      return data.hotels;
+    }
+
+    return [];
+  };
+
+
+  /* =========================================================
+     GET TRANSPORT COST
+  ========================================================= */
+
+  const getTransportCost = (transport) => {
+
+    return Number(
+      transport?.cost ??
+        transport?.price ??
+        transport?.fare ??
+        transport?.total_cost ??
+        transport?.price_per_person ??
+        0
+    );
+  };
+
+
+  /* =========================================================
+     GET HOTEL PRICE
+  ========================================================= */
+
+  const getHotelPrice = (hotel) => {
+
+    return Number(
+      hotel?.price_per_night ??
+        hotel?.price ??
+        hotel?.nightly_price ??
+        hotel?.cost_per_night ??
+        hotel?.rate ??
+        0
+    );
+  };
+
+
+  /* =========================================================
+     SEARCH TRANSPORT
+  ========================================================= */
+
+  const searchTransport = async () => {
+
+    setTransportError("");
+    setTransportSearched(true);
+    setTransportResults([]);
+    setSelectedTransport(null);
+
+    if (!form.fromCity.trim()) {
+      setTransportError(
+        "Please select your starting city."
+      );
+      return [];
+    }
+
+    if (!form.destination.trim()) {
+      setTransportError(
+        "Please select your destination."
+      );
+      return [];
+    }
+
+    if (form.fromCity === form.destination) {
+      setTransportError(
+        "Starting city and destination cannot be the same."
+      );
+      return [];
+    }
+
+    setTransportLoading(true);
 
     try {
-      setLoading(true);
-      setError("");
-      setResult(null);
 
-      const response = await API.post(
-        "/budget-trip/plan",
-        {
-          location: form.location.trim(),
+      let response;
 
-          days: Number(form.days),
+      try {
 
-          persons: Number(form.persons),
+        response = await axios.get(
+          `${API}/budget-transports/search/affordable`,
+          {
+            params: {
+              from_city: form.fromCity,
+              to_city: form.destination,
+              budget: Number(form.budget || 0),
+              passengers: Number(form.passengers || 1),
+            },
+          }
+        );
 
-          budget: Number(form.budget),
+      } catch {
 
-          travel_style: form.travel_style,
+        console.warn(
+          "Affordable transport endpoint failed. Trying normal transport service."
+        );
 
-          include_hotel: form.include_hotel,
+        response = await axios.get(
+          `${API}/transports/`
+        );
+      }
 
-          include_transport: form.include_transport,
 
-          include_food: form.include_food,
+      const results = normalizeResponse(
+        response.data
+      );
 
-          include_activities: form.include_activities,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+
+      /* FILTER ROUTE */
+
+      const routeResults = results.filter(
+        (transport) => {
+
+          const from =
+            transport?.from_city ??
+            transport?.from ??
+            transport?.source ??
+            transport?.departure_city ??
+            "";
+
+          const to =
+            transport?.to_city ??
+            transport?.to ??
+            transport?.destination ??
+            transport?.arrival_city ??
+            "";
+
+          if (from || to) {
+
+            const fromValue =
+              String(from).toLowerCase();
+
+            const toValue =
+              String(to).toLowerCase();
+
+            const selectedFrom =
+              String(form.fromCity).toLowerCase();
+
+            const selectedTo =
+              String(form.destination).toLowerCase();
+
+            const fromMatches =
+              fromValue === selectedFrom ||
+              fromValue.includes(selectedFrom);
+
+            const toMatches =
+              toValue === selectedTo ||
+              toValue.includes(selectedTo);
+
+            return fromMatches && toMatches;
+          }
+
+          return true;
         }
       );
 
-      console.log("AI Budget Trip:", response.data);
 
-      setResult(response.data);
-    } catch (err) {
-      console.error(
-        "Budget Trip Error:",
-        err.response?.data || err.message
+      /* NORMALIZE COST */
+
+      const normalized =
+        routeResults
+          .map((transport) => ({
+            ...transport,
+            cost: getTransportCost(transport),
+          }))
+          .filter(
+            (transport) =>
+              transport.cost > 0
+          );
+
+
+      /* CHEAPEST FIRST */
+
+      const sorted = [...normalized].sort(
+        (a, b) =>
+          Number(a.cost) -
+          Number(b.cost)
       );
 
-      if (err.response?.status === 401) {
-        localStorage.removeItem("token");
 
-        setError(
-          "Your login session has expired. Please login again."
+      setTransportResults(sorted);
+
+
+      /* AUTO SELECT CHEAPEST */
+
+      if (sorted.length > 0) {
+
+        const cheapest = sorted[0];
+
+        setSelectedTransport(
+          cheapest
         );
 
-        setTimeout(() => {
-          navigate("/login");
-        }, 1200);
+        updateField(
+          "transport",
+          cheapest.cost
+        );
 
-        return;
-      }
-
-      const detail = err.response?.data?.detail;
-
-      if (typeof detail === "string") {
-        setError(detail);
-      } else if (detail?.error) {
-        setError(detail.error);
       } else {
-        setError(
-          "Unable to create your AI budget trip. Please try again."
+
+        updateField(
+          "transport",
+          0
         );
       }
+
+
+      return sorted;
+
+    } catch (error) {
+
+      console.error(
+        "Transport search error:",
+        error
+      );
+
+      console.error(
+        "Backend response:",
+        error?.response?.data
+      );
+
+      setTransportResults([]);
+      setSelectedTransport(null);
+
+      updateField(
+        "transport",
+        0
+      );
+
+
+      if (
+        error?.response?.status === 404
+      ) {
+
+        setTransportError(
+          "Transport service was not found. Please check your transport API."
+        );
+
+      } else if (
+        error?.response?.status === 422
+      ) {
+
+        setTransportError(
+          "Transport search received invalid information."
+        );
+
+      } else if (
+        error?.response?.status >= 500
+      ) {
+
+        setTransportError(
+          "Transport service returned a server error."
+        );
+
+      } else {
+
+        setTransportError(
+          "Unable to load transport options."
+        );
+      }
+
+      return [];
+
     } finally {
-      setLoading(false);
+
+      setTransportLoading(false);
     }
   };
 
-  // =====================================================
-  // FORMAT MONEY
-  // =====================================================
 
-  const formatMoney = (value) => {
-    return Number(value || 0).toLocaleString("en-PK");
+  /* =========================================================
+     SEARCH HOTELS
+  ========================================================= */
+
+  const searchHotels = async () => {
+
+    setHotelError("");
+    setHotelSearched(true);
+    setHotelResults([]);
+    setSelectedHotel(null);
+
+    if (!form.destination.trim()) {
+
+      setHotelError(
+        "Please select your destination."
+      );
+
+      return [];
+    }
+
+    setHotelLoading(true);
+
+    try {
+
+      const response = await axios.get(
+        `${API}/hotels/`
+      );
+
+
+      const results =
+        normalizeResponse(
+          response.data
+        );
+
+
+      /* FILTER DESTINATION */
+
+      const destinationHotels =
+        results.filter((hotel) => {
+
+          const location =
+            hotel?.location ??
+            hotel?.city ??
+            hotel?.destination ??
+            "";
+
+          if (!location) {
+            return true;
+          }
+
+          return String(location)
+            .toLowerCase()
+            .includes(
+              String(
+                form.destination
+              ).toLowerCase()
+            );
+        });
+
+
+      /* NORMALIZE HOTEL PRICE */
+
+      const normalized =
+        destinationHotels
+          .map((hotel) => ({
+            ...hotel,
+
+            price_per_night:
+              getHotelPrice(hotel),
+          }))
+          .filter(
+            (hotel) =>
+              Number(
+                hotel.price_per_night
+              ) > 0
+          );
+
+
+      /* CHEAPEST FIRST */
+
+      const sorted = [...normalized].sort(
+        (a, b) =>
+          Number(
+            a.price_per_night
+          ) -
+          Number(
+            b.price_per_night
+          )
+      );
+
+
+      setHotelResults(sorted);
+
+
+      /* AUTO SELECT CHEAPEST HOTEL */
+
+      if (sorted.length > 0) {
+
+        const cheapest = sorted[0];
+
+        setSelectedHotel(
+          cheapest
+        );
+
+        const nights = Math.max(
+          Number(form.days || 1) - 1,
+          1
+        );
+
+        /*
+         * One room for up to two travelers.
+         * This matches the backend calculation.
+         */
+        const rooms = Math.max(
+          Math.ceil(
+            Number(form.passengers || 1) / 2
+          ),
+          1
+        );
+
+        const hotelTotal =
+          Number(
+            cheapest.price_per_night || 0
+          ) *
+          nights *
+          rooms;
+
+        updateField(
+          "hotel",
+          hotelTotal
+        );
+
+      } else {
+
+        updateField(
+          "hotel",
+          0
+        );
+      }
+
+
+      /*
+       * IMPORTANT:
+       *
+       * Food is NOT calculated here anymore.
+       *
+       * The backend /budget-trip/plan endpoint
+       * calculates food according to:
+       *
+       * persons × days × estimated meal cost
+       *
+       * and adjusts included hotel meals.
+       */
+
+
+      return sorted;
+
+    } catch (error) {
+
+      console.error(
+        "Hotel search error:",
+        error
+      );
+
+      console.error(
+        "Backend response:",
+        error?.response?.data
+      );
+
+      setHotelResults([]);
+      setSelectedHotel(null);
+
+      updateField(
+        "hotel",
+        0
+      );
+
+
+      if (
+        error?.response?.status === 404
+      ) {
+
+        setHotelError(
+          "Hotel service was not found. Please check your hotel API."
+        );
+
+      } else if (
+        error?.response?.status >= 500
+      ) {
+
+        setHotelError(
+          "Hotel service returned a server error."
+        );
+
+      } else {
+
+        setHotelError(
+          "Unable to load hotels for this destination."
+        );
+      }
+
+      return [];
+
+    } finally {
+
+      setHotelLoading(false);
+    }
   };
 
-  // =====================================================
-  // PAGE
-  // =====================================================
+
+  /* =========================================================
+     SELECT TRANSPORT
+  ========================================================= */
+
+  const selectTransport = (transport) => {
+
+    setSelectedTransport(
+      transport
+    );
+
+    updateField(
+      "transport",
+      Number(
+        transport.cost || 0
+      )
+    );
+  };
+
+
+  /* =========================================================
+     SELECT HOTEL
+  ========================================================= */
+
+  const selectHotel = (hotel) => {
+
+    setSelectedHotel(
+      hotel
+    );
+
+    const nights = Math.max(
+      Number(form.days || 1) - 1,
+      1
+    );
+
+    /*
+     * One room for up to two travelers.
+     */
+    const rooms = Math.max(
+      Math.ceil(
+        Number(form.passengers || 1) / 2
+      ),
+      1
+    );
+
+    const hotelTotal =
+      Number(
+        hotel.price_per_night || 0
+      ) *
+      nights *
+      rooms;
+
+    updateField(
+      "hotel",
+      hotelTotal
+    );
+
+    /*
+     * Food is intentionally NOT changed here.
+     *
+     * Food is calculated by backend when
+     * Generate AI Budget Plan is pressed.
+     */
+  };
+
+
+  /* =========================================================
+     BUILD AI REQUEST
+  ========================================================= */
+
+  const buildAIRequest = () => {
+
+    return {
+      location:
+        form.destination,
+
+      days:
+        Number(form.days),
+
+      persons:
+        Number(form.passengers),
+
+      budget:
+        Number(form.budget),
+
+      from_city:
+        form.fromCity,
+
+      travel_style:
+        "budget",
+
+      include_hotel:
+        true,
+
+      include_transport:
+        true,
+
+      include_food:
+        true,
+
+      include_activities:
+        true,
+    };
+  };
+
+
+  /* =========================================================
+     UPDATE FOOD BREAKDOWN
+  ========================================================= */
+
+  const updateFoodBreakdown = (data) => {
+
+    const foodCost = Number(
+      data?.food_cost || 0
+    );
+
+    const persons = Number(
+      form.passengers || 1
+    );
+
+    const days = Number(
+      form.days || 1
+    );
+
+    /*
+     * Backend budget travel style:
+     *
+     * PKR 800 per person per day
+     *
+     * 3 meals per day.
+     */
+
+    const dailyFoodPerPerson = 800;
+
+    const mealCostPerPerson =
+      dailyFoodPerPerson / 3;
+
+    const breakfastIncluded =
+      Boolean(
+        data?.breakfast_included
+      );
+
+    const dinnerIncluded =
+      Boolean(
+        data?.dinner_included
+      );
+
+
+    const breakfastCost =
+      breakfastIncluded
+        ? 0
+        : mealCostPerPerson *
+          persons *
+          days;
+
+
+    const lunchCost =
+      mealCostPerPerson *
+      persons *
+      days;
+
+
+    const dinnerCost =
+      dinnerIncluded
+        ? 0
+        : mealCostPerPerson *
+          persons *
+          days;
+
+
+    setFoodBreakdown({
+
+      breakfast:
+        Math.round(
+          breakfastCost
+        ),
+
+      lunch:
+        Math.round(
+          lunchCost
+        ),
+
+      dinner:
+        Math.round(
+          dinnerCost
+        ),
+
+      total:
+        Math.round(
+          foodCost
+        ),
+
+      breakfastIncluded,
+
+      dinnerIncluded,
+    });
+  };
+
+
+  /* =========================================================
+     NORMALIZE AI ITINERARY
+  ========================================================= */
+
+  const normalizeItinerary = (
+    itinerary
+  ) => {
+
+    if (!Array.isArray(itinerary)) {
+      return [];
+    }
+
+    return itinerary.map(
+      (day, index) => {
+
+        const activities =
+          Array.isArray(
+            day?.activities
+          )
+            ? day.activities
+            : Array.isArray(
+                day?.plans
+              )
+            ? day.plans
+            : [];
+
+        return {
+
+          day:
+            Number(
+              day?.day
+            ) ||
+            index + 1,
+
+          title:
+            day?.title ||
+            day?.name ||
+            `Explore ${form.destination}`,
+
+          activities:
+            activities.map(
+              (activity) =>
+                typeof activity ===
+                "string"
+                  ? activity
+                  : activity?.name ||
+                    activity?.title ||
+                    activity?.description ||
+                    "Recommended activity"
+            ),
+        };
+      }
+    );
+  };
+
+
+  /* =========================================================
+     FALLBACK ITINERARY
+  ========================================================= */
+
+  const generateFallbackPlan = () => {
+
+    const days = Number(
+      form.days
+    );
+
+    return Array.from(
+      {
+        length: Math.min(
+          days,
+          30
+        ),
+      },
+      (_, index) => {
+
+        const day =
+          index + 1;
+
+
+        if (day === 1) {
+
+          return {
+
+            day,
+
+            title:
+              `Travel from ${form.fromCity} to ${form.destination}`,
+
+            activities: [
+
+              `Travel from ${form.fromCity} to ${form.destination}`,
+
+              "Hotel check-in",
+
+              "Explore nearby attractions",
+
+              "Enjoy local food",
+            ],
+          };
+        }
+
+
+        if (day === days) {
+
+          return {
+
+            day,
+
+            title:
+              `Final Day in ${form.destination}`,
+
+            activities: [
+
+              "Visit a final attraction",
+
+              "Shopping / souvenirs",
+
+              `Prepare for return journey to ${form.fromCity}`,
+            ],
+          };
+        }
+
+
+        return {
+
+          day,
+
+          title:
+            `Explore ${form.destination}`,
+
+          activities: [
+
+            "Visit recommended tourist attractions",
+
+            "Enjoy local food",
+
+            "Explore cultural and historical places",
+          ],
+        };
+      }
+    );
+  };
+
+
+  /* =========================================================
+     GENERATE AI PLAN
+  ========================================================= */
+
+  const generatePlan = async () => {
+
+    setAiError("");
+
+
+    /* VALIDATION */
+
+    if (!CITIES.includes(form.fromCity)) {
+
+      alert(
+        "Please select a valid starting city."
+      );
+
+      return;
+    }
+
+
+    if (!CITIES.includes(form.destination)) {
+
+      alert(
+        "Please select a valid destination."
+      );
+
+      return;
+    }
+
+
+    if (form.fromCity === form.destination) {
+
+      alert(
+        "Starting city and destination cannot be the same."
+      );
+
+      return;
+    }
+
+
+    if (
+      !form.budget ||
+      Number(form.budget) <= 0
+    ) {
+
+      alert(
+        "Please enter your total trip budget."
+      );
+
+      return;
+    }
+
+
+    if (
+      Number(form.days) <= 0
+    ) {
+
+      alert(
+        "Number of days must be at least 1."
+      );
+
+      return;
+    }
+
+
+    if (
+      Number(form.passengers) <= 0
+    ) {
+
+      alert(
+        "Passengers must be at least 1."
+      );
+
+      return;
+    }
+
+
+    setAiLoading(true);
+
+
+    try {
+
+      /* =====================================================
+         SEARCH SERVICES FIRST
+      ===================================================== */
+
+      await Promise.all([
+        searchTransport(),
+        searchHotels(),
+      ]);
+
+
+      /* =====================================================
+         BUILD REQUEST
+      ===================================================== */
+
+      const requestData =
+        buildAIRequest();
+
+
+      console.log(
+        "AI Budget Trip Request:",
+        requestData
+      );
+
+
+      /* =====================================================
+         CALL BACKEND
+      ===================================================== */
+
+      let aiResponse;
+
+
+      try {
+
+        aiResponse =
+          await axios.post(
+            AI_BUDGET_TRIP_ENDPOINT,
+            requestData
+          );
+
+      } catch (backendError) {
+
+        console.warn(
+          "AI budget endpoint unavailable. Using local itinerary fallback.",
+          backendError?.response?.data
+        );
+
+        /*
+         * Keep fallback behavior.
+         */
+        aiResponse = null;
+      }
+
+
+      /* =====================================================
+         PROCESS BACKEND RESPONSE
+      ===================================================== */
+
+      if (aiResponse?.data) {
+
+        const data =
+          aiResponse.data;
+
+
+        console.log(
+          "AI Budget Trip Response:",
+          data
+        );
+
+
+        /* =================================================
+           ITINERARY
+        ================================================= */
+
+        const backendItinerary =
+          normalizeItinerary(
+            data?.itinerary
+          );
+
+
+        if (
+          backendItinerary.length > 0
+        ) {
+
+          setTripPlan(
+            backendItinerary
+          );
+
+        } else {
+
+          setTripPlan(
+            generateFallbackPlan()
+          );
+        }
+
+
+        /* =================================================
+           TRANSPORT
+        ================================================= */
+
+        if (
+          data.transport_cost !=
+          null
+        ) {
+
+          updateField(
+            "transport",
+            Number(
+              data.transport_cost
+            )
+          );
+        }
+
+
+        /* =================================================
+           HOTEL
+        ================================================= */
+
+        if (
+          data.hotel_cost !=
+          null
+        ) {
+
+          updateField(
+            "hotel",
+            Number(
+              data.hotel_cost
+            )
+          );
+        }
+
+
+        /* =================================================
+           FOOD
+        ================================================= */
+
+        if (
+          data.food_cost !=
+          null
+        ) {
+
+          const foodCost =
+            Number(
+              data.food_cost || 0
+            );
+
+
+          updateField(
+            "food",
+            foodCost
+          );
+
+
+          /*
+           * Build breakfast/lunch/dinner
+           * breakdown from backend information.
+           */
+
+          updateFoodBreakdown(
+            data
+          );
+
+        } else {
+
+          /*
+           * If backend does not return food,
+           * clear breakdown.
+           */
+
+          setFoodBreakdown({
+
+            breakfast: 0,
+
+            lunch: 0,
+
+            dinner: 0,
+
+            total: 0,
+
+            breakfastIncluded: false,
+
+            dinnerIncluded: false,
+          });
+        }
+
+
+        /* =================================================
+           ACTIVITIES
+        ================================================= */
+
+        if (
+          data.activities_cost !=
+          null
+        ) {
+
+          updateField(
+            "activities",
+            Number(
+              data.activities_cost
+            )
+          );
+        }
+
+
+        /* =================================================
+           MISCELLANEOUS
+        ================================================= */
+
+        if (
+          data.miscellaneous_cost !=
+          null
+        ) {
+
+          updateField(
+            "other",
+            Number(
+              data.miscellaneous_cost
+            )
+          );
+        }
+
+
+      } else {
+
+        /*
+         * Backend unavailable.
+         *
+         * Keep locally selected
+         * transport/hotel values.
+         */
+
+        setTripPlan(
+          generateFallbackPlan()
+        );
+
+        /*
+         * Local food fallback.
+         *
+         * Budget style:
+         * PKR 800/person/day
+         */
+
+        const localFood =
+          800 *
+          Number(form.passengers || 1) *
+          Number(form.days || 1);
+
+
+        updateField(
+          "food",
+          localFood
+        );
+
+
+        setFoodBreakdown({
+
+          breakfast:
+            Math.round(
+              localFood / 3
+            ),
+
+          lunch:
+            Math.round(
+              localFood / 3
+            ),
+
+          dinner:
+            Math.round(
+              localFood / 3
+            ),
+
+          total:
+            Math.round(
+              localFood
+            ),
+
+          breakfastIncluded: false,
+
+          dinnerIncluded: false,
+        });
+      }
+
+
+      /* =====================================================
+         SHOW RESULTS
+      ===================================================== */
+
+      setPlanned(true);
+
+
+      setTimeout(() => {
+
+        document
+          .getElementById(
+            "trip-results"
+          )
+          ?.scrollIntoView({
+            behavior:
+              "smooth",
+
+            block:
+              "start",
+          });
+
+      }, 300);
+
+
+    } catch (error) {
+
+      console.error(
+        "AI Budget Trip error:",
+        error
+      );
+
+      console.error(
+        "Backend response:",
+        error?.response?.data
+      );
+
+
+      setAiError(
+        "Unable to generate the AI plan. Your available transport and hotel results are still shown."
+      );
+
+
+      setTripPlan(
+        generateFallbackPlan()
+      );
+
+
+      /*
+       * Local food fallback.
+       */
+
+      const localFood =
+        800 *
+        Number(form.passengers || 1) *
+        Number(form.days || 1);
+
+
+      updateField(
+        "food",
+        localFood
+      );
+
+
+      setFoodBreakdown({
+
+        breakfast:
+          Math.round(
+            localFood / 3
+          ),
+
+        lunch:
+          Math.round(
+            localFood / 3
+          ),
+
+        dinner:
+          Math.round(
+            localFood / 3
+          ),
+
+        total:
+          Math.round(
+            localFood
+          ),
+
+        breakfastIncluded: false,
+
+        dinnerIncluded: false,
+      });
+
+
+      setPlanned(true);
+
+    } finally {
+
+      setAiLoading(false);
+    }
+  };
+
+
+  /* =========================================================
+     RESET
+  ========================================================= */
+
+  const resetPlanner = () => {
+
+    setForm({
+
+      fromCity:
+        "Bahawalpur",
+
+      destination:
+        "",
+
+      days:
+        3,
+
+      passengers:
+        2,
+
+      budget:
+        "",
+
+      transport:
+        0,
+
+      hotel:
+        0,
+
+      food:
+        0,
+
+      activities:
+        0,
+
+      other:
+        0,
+    });
+
+
+    setFoodBreakdown({
+
+      breakfast: 0,
+
+      lunch: 0,
+
+      dinner: 0,
+
+      total: 0,
+
+      breakfastIncluded: false,
+
+      dinnerIncluded: false,
+    });
+
+
+    setTripPlan([]);
+    setPlanned(false);
+
+    setAiLoading(false);
+    setAiError("");
+
+    setTransportResults([]);
+    setTransportSearched(false);
+    setSelectedTransport(null);
+    setTransportError("");
+
+    setHotelResults([]);
+    setHotelSearched(false);
+    setSelectedHotel(null);
+    setHotelError("");
+  };
+
+
+  /* =========================================================
+     RENDER
+  ========================================================= */
 
   return (
-    <div className="container py-5">
 
-      {/* =================================================
-          HEADER
-      ================================================= */}
+    <div className="budget-page">
 
-      <div className="text-center mb-5">
 
-        <div
-          className="d-inline-flex align-items-center justify-content-center rounded-circle bg-primary text-white mb-3"
-          style={{
-            width: "70px",
-            height: "70px",
-            fontSize: "32px",
-          }}
-        >
-          🤖
+      {/* =====================================================
+          HERO
+      ===================================================== */}
+
+      <section className="budget-hero">
+
+        <div className="budget-hero-overlay">
+
+          <div className="container">
+
+            <div className="budget-hero-content">
+
+              <div className="ai-badge">
+
+                <FaRobot />
+
+                AI-POWERED TRAVEL PLANNER
+
+              </div>
+
+
+              <h1>
+                AI Budget Trip Planner
+              </h1>
+
+
+              <p>
+                Plan your city-to-city journey
+                with smart budget estimation
+                using available transport,
+                hotels, food and activities.
+              </p>
+
+            </div>
+
+          </div>
+
         </div>
 
-        <h1 className="fw-bold">
-          AI Budget Trip Planner
-        </h1>
+      </section>
 
-        <p className="text-muted">
-          Tell us your destination and budget. AI will
-          create a complete trip plan for you.
-        </p>
 
-      </div>
 
-      {/* =================================================
-          ERROR
-      ================================================= */}
+      {/* =====================================================
+          MAIN
+      ===================================================== */}
 
-      {error && (
-        <div className="alert alert-danger text-center">
-          {error}
-        </div>
-      )}
+      <section className="planner-section">
 
-      {/* =================================================
-          FORM
-      ================================================= */}
+        <div className="container">
 
-      {!result && (
-        <div className="row justify-content-center">
+          <div className="planner-grid">
 
-          <div className="col-lg-8">
 
-            <div className="card shadow border-0">
+            {/* =================================================
+                LEFT — FORM
+            ================================================= */}
 
-              <div className="card-body p-4 p-md-5">
+            <div className="planner-card">
 
-                <form onSubmit={handleSubmit}>
 
-                  {/* DESTINATION */}
+              {/* HEADING */}
 
-                  <div className="mb-4">
+              <div className="card-heading">
 
-                    <label className="form-label fw-bold">
-                      📍 Destination
-                    </label>
+                <div className="heading-icon">
+                  <FaCalculator />
+                </div>
 
-                    <input
-                      type="text"
-                      className="form-control form-control-lg"
-                      name="location"
-                      value={form.location}
-                      onChange={handleChange}
-                      placeholder="e.g. Bahawalpur"
-                      required
-                    />
+                <div>
 
-                  </div>
+                  <h2>
+                    Build Your Trip
+                  </h2>
 
-                  {/* DAYS + PERSONS */}
+                  <p>
+                    Enter your travel requirements
+                  </p>
 
-                  <div className="row">
+                </div>
 
-                    <div className="col-md-6 mb-4">
+              </div>
 
-                      <label className="form-label fw-bold">
-                        📅 Number of Days
-                      </label>
 
-                      <input
-                        type="number"
-                        className="form-control form-control-lg"
-                        name="days"
-                        min="1"
-                        max="30"
-                        value={form.days}
-                        onChange={handleChange}
-                        required
-                      />
 
-                    </div>
+              {/* STARTING CITY */}
 
-                    <div className="col-md-6 mb-4">
+              <div className="form-group">
 
-                      <label className="form-label fw-bold">
-                        👥 Travelers
-                      </label>
+                <label>
+                  <FaMapMarkerAlt />
+                  Starting City
+                </label>
 
-                      <input
-                        type="number"
-                        className="form-control form-control-lg"
-                        name="persons"
-                        min="1"
-                        max="50"
-                        value={form.persons}
-                        onChange={handleChange}
-                        required
-                      />
+                <div className="input-wrapper">
 
-                    </div>
+                  <FaMapMarkerAlt />
 
-                  </div>
+                  <select
+                    value={
+                      form.fromCity
+                    }
+                    onChange={(e) =>
+                      updateField(
+                        "fromCity",
+                        e.target.value
+                      )
+                    }
+                  >
 
-                  {/* BUDGET */}
+                    {CITIES.map((city) => (
 
-                  <div className="mb-4">
+                      <option
+                        key={city}
+                        value={city}
+                      >
+                        {city}
+                      </option>
 
-                    <label className="form-label fw-bold">
-                      💰 Total Budget (PKR)
-                    </label>
+                    ))}
+
+                  </select>
+
+                </div>
+
+              </div>
+
+
+
+              {/* DESTINATION */}
+
+              <div className="form-group">
+
+                <label>
+                  <FaMapMarkerAlt />
+                  Destination
+                </label>
+
+                <div className="input-wrapper">
+
+                  <FaMapMarkerAlt />
+
+                  <select
+                    value={
+                      form.destination
+                    }
+                    onChange={(e) =>
+                      updateField(
+                        "destination",
+                        e.target.value
+                      )
+                    }
+                  >
+
+                    <option value="">
+                      Select Destination
+                    </option>
+
+                    {CITIES.map((city) => (
+
+                      <option
+                        key={city}
+                        value={city}
+                      >
+                        {city}
+                      </option>
+
+                    ))}
+
+                  </select>
+
+                </div>
+
+              </div>
+
+
+
+              {/* DAYS + PASSENGERS */}
+
+              <div className="two-column">
+
+                <div className="form-group">
+
+                  <label>
+                    <FaCalendarAlt />
+                    Number of Days
+                  </label>
+
+                  <div className="input-wrapper">
+
+                    <FaCalendarAlt />
 
                     <input
                       type="number"
-                      className="form-control form-control-lg"
-                      name="budget"
                       min="1"
-                      value={form.budget}
-                      onChange={handleChange}
-                      required
+                      max="30"
+                      value={
+                        form.days
+                      }
+                      onChange={(e) =>
+                        updateField(
+                          "days",
+                          Math.max(
+                            1,
+                            Number(
+                              e.target.value
+                            )
+                          )
+                        )
+                      }
                     />
 
                   </div>
 
-                  {/* TRAVEL STYLE */}
+                </div>
 
-                  <div className="mb-4">
 
-                    <label className="form-label fw-bold">
-                      🎒 Travel Style
-                    </label>
+                <div className="form-group">
 
-                    <select
-                      className="form-select form-select-lg"
-                      name="travel_style"
-                      value={form.travel_style}
-                      onChange={handleChange}
-                    >
-                      <option value="Budget">
-                        Budget
-                      </option>
+                  <label>
+                    <FaUsers />
+                    Passengers
+                  </label>
 
-                      <option value="Standard">
-                        Standard
-                      </option>
+                  <div className="input-wrapper">
 
-                      <option value="Luxury">
-                        Luxury
-                      </option>
-                    </select>
+                    <FaUsers />
+
+                    <input
+                      type="number"
+                      min="1"
+                      max="50"
+                      value={
+                        form.passengers
+                      }
+                      onChange={(e) =>
+                        updateField(
+                          "passengers",
+                          Math.max(
+                            1,
+                            Number(
+                              e.target.value
+                            )
+                          )
+                        )
+                      }
+                    />
 
                   </div>
 
-                  {/* SERVICES */}
+                </div>
 
-                  <div className="mb-4">
+              </div>
 
-                    <h5 className="fw-bold mb-3">
-                      Include in my trip
-                    </h5>
 
-                    <div className="row">
 
-                      <div className="col-md-6">
+              {/* BUDGET */}
 
-                        <div className="form-check mb-3">
+              <div className="form-group">
 
-                          <input
-                            className="form-check-input"
-                            type="checkbox"
-                            name="include_hotel"
-                            checked={form.include_hotel}
-                            onChange={handleChange}
-                            id="includeHotel"
-                          />
+                <label>
+                  <FaMoneyBillWave />
+                  Total Trip Budget
+                </label>
 
-                          <label
-                            className="form-check-label"
-                            htmlFor="includeHotel"
-                          >
-                            🏨 Hotel
-                          </label>
+                <div className="input-wrapper">
 
-                        </div>
+                  <span className="currency">
+                    PKR
+                  </span>
 
-                        <div className="form-check mb-3">
+                  <input
+                    type="number"
+                    min="0"
+                    placeholder="e.g. 100000"
+                    value={
+                      form.budget
+                    }
+                    onChange={(e) =>
+                      updateField(
+                        "budget",
+                        e.target.value
+                      )
+                    }
+                  />
 
-                          <input
-                            className="form-check-input"
-                            type="checkbox"
-                            name="include_transport"
-                            checked={form.include_transport}
-                            onChange={handleChange}
-                            id="includeTransport"
-                          />
+                </div>
 
-                          <label
-                            className="form-check-label"
-                            htmlFor="includeTransport"
-                          >
-                            🚌 Transport
-                          </label>
+              </div>
 
-                        </div>
 
-                      </div>
 
-                      <div className="col-md-6">
+              {/* =================================================
+                  TRANSPORT
+              ================================================= */}
 
-                        <div className="form-check mb-3">
+              <div className="service-section">
 
-                          <input
-                            className="form-check-input"
-                            type="checkbox"
-                            name="include_food"
-                            checked={form.include_food}
-                            onChange={handleChange}
-                            id="includeFood"
-                          />
+                <div className="service-heading">
 
-                          <label
-                            className="form-check-label"
-                            htmlFor="includeFood"
-                          >
-                            🍽️ Food
-                          </label>
+                  <div>
 
-                        </div>
+                    <h3>
+                      Available Transport
+                    </h3>
 
-                        <div className="form-check mb-3">
+                    <p>
+                      From{" "}
+                      {form.fromCity ||
+                        "your city"}
+                      {" "}to{" "}
+                      {form.destination ||
+                        "your destination"}
+                    </p>
 
-                          <input
-                            className="form-check-input"
-                            type="checkbox"
-                            name="include_activities"
-                            checked={form.include_activities}
-                            onChange={handleChange}
-                            id="includeActivities"
-                          />
+                  </div>
 
-                          <label
-                            className="form-check-label"
-                            htmlFor="includeActivities"
-                          >
-                            🎟️ Activities
-                          </label>
+                  <FaBus />
 
-                        </div>
+                </div>
 
-                      </div>
+
+                <button
+                  type="button"
+                  className="service-button"
+                  onClick={
+                    searchTransport
+                  }
+                  disabled={
+                    transportLoading
+                  }
+                >
+
+                  {transportLoading ? (
+
+                    <>
+                      <FaSpinner className="spin" />
+                      Loading Transport...
+                    </>
+
+                  ) : (
+
+                    <>
+                      <FaSearch />
+                      Find Affordable Transport
+                    </>
+
+                  )}
+
+                </button>
+
+
+                {transportError && (
+
+                  <div className="service-error">
+
+                    <FaExclamationTriangle />
+
+                    <span>
+                      {transportError}
+                    </span>
+
+                  </div>
+
+                )}
+
+
+                {selectedTransport && (
+
+                  <div className="selected-service">
+
+                    <div className="selected-icon">
+                      <FaCheckCircle />
+                    </div>
+
+                    <div className="selected-info">
+
+                      <span>
+                        SELECTED TRANSPORT
+                      </span>
+
+                      <strong>
+                        {selectedTransport.transport_type ||
+                          selectedTransport.type ||
+                          selectedTransport.name ||
+                          "Transport"}
+                      </strong>
+
+                      <small>
+                        {selectedTransport.from_city ||
+                          form.fromCity}
+                        {" → "}
+                        {selectedTransport.to_city ||
+                          form.destination}
+                      </small>
 
                     </div>
 
+                    <strong className="selected-price">
+                      PKR{" "}
+                      {Number(
+                        selectedTransport.cost ||
+                          0
+                      ).toLocaleString()}
+                    </strong>
+
                   </div>
 
-                  {/* SUBMIT */}
+                )}
 
-                  <button
-                    type="submit"
-                    className="btn btn-primary btn-lg w-100"
-                    disabled={loading}
+
+                {transportSearched && (
+
+                  <div className="service-results">
+
+                    {transportLoading ? (
+
+                      <div className="loading-box">
+
+                        <FaSpinner className="spin" />
+
+                        Finding transport...
+
+                      </div>
+
+                    ) : transportResults.length === 0 ? (
+
+                      !transportError && (
+
+                        <div className="empty-box">
+
+                          <FaBus />
+
+                          <strong>
+                            No transport found
+                          </strong>
+
+                          <span>
+                            No transport service is
+                            currently available for{" "}
+                            {form.fromCity} →{" "}
+                            {form.destination}.
+                          </span>
+
+                        </div>
+
+                      )
+
+                    ) : (
+
+                      <>
+
+                        <div className="result-count">
+
+                          {transportResults.length}{" "}
+                          transport option
+                          {transportResults.length !== 1
+                            ? "s"
+                            : ""}{" "}
+                          found
+
+                        </div>
+
+
+                        {transportResults.map(
+                          (
+                            transport,
+                            index
+                          ) => {
+
+                            const cost =
+                              Number(
+                                transport.cost ||
+                                  0
+                              );
+
+                            const selected =
+                              selectedTransport ===
+                              transport;
+
+                            return (
+
+                              <div
+                                className={`service-option ${
+                                  selected
+                                    ? "selected"
+                                    : ""
+                                }`}
+                                key={
+                                  transport.id ||
+                                  index
+                                }
+                              >
+
+                                <div className="service-left">
+
+                                  <div className="option-icon">
+                                    <FaBus />
+                                  </div>
+
+                                  <div className="option-info">
+
+                                    <strong>
+                                      {transport.transport_type ||
+                                        transport.type ||
+                                        transport.name ||
+                                        "Transport"}
+                                    </strong>
+
+                                    <span>
+                                      {transport.from_city ||
+                                        form.fromCity}
+                                      {" → "}
+                                      {transport.to_city ||
+                                        form.destination}
+                                    </span>
+
+                                    <small>
+
+                                      {transport.distance_km !=
+                                      null
+                                        ? `${transport.distance_km} km`
+                                        : ""}
+
+                                      {transport.travel_time_hours !=
+                                      null
+                                        ? ` • ${transport.travel_time_hours} hours`
+                                        : ""}
+
+                                    </small>
+
+                                  </div>
+
+                                </div>
+
+
+                                <div className="option-price">
+
+                                  <strong>
+                                    PKR{" "}
+                                    {cost.toLocaleString()}
+                                  </strong>
+
+                                  <button
+                                    type="button"
+                                    onClick={() =>
+                                      selectTransport(
+                                        transport
+                                      )
+                                    }
+                                  >
+                                    {selected
+                                      ? "Selected"
+                                      : "Use"}
+                                  </button>
+
+                                </div>
+
+                              </div>
+
+                            );
+                          }
+                        )}
+
+                      </>
+
+                    )}
+
+                  </div>
+
+                )}
+
+              </div>
+
+
+
+              {/* =================================================
+                  HOTEL
+              ================================================= */}
+
+              <div className="service-section">
+
+                <div className="service-heading">
+
+                  <div>
+
+                    <h3>
+                      Available Hotels
+                    </h3>
+
+                    <p>
+                      Hotels available in{" "}
+                      {form.destination ||
+                        "your destination"}
+                    </p>
+
+                  </div>
+
+                  <FaHotel />
+
+                </div>
+
+
+                <button
+                  type="button"
+                  className="service-button hotel-button"
+                  onClick={
+                    searchHotels
+                  }
+                  disabled={
+                    hotelLoading
+                  }
+                >
+
+                  {hotelLoading ? (
+
+                    <>
+                      <FaSpinner className="spin" />
+                      Loading Hotels...
+                    </>
+
+                  ) : (
+
+                    <>
+                      <FaSearch />
+                      Find Affordable Hotel
+                    </>
+
+                  )}
+
+                </button>
+
+
+                {hotelError && (
+
+                  <div className="service-error">
+
+                    <FaExclamationTriangle />
+
+                    <span>
+                      {hotelError}
+                    </span>
+
+                  </div>
+
+                )}
+
+
+                {selectedHotel && (
+
+                  <div className="selected-service hotel-selected">
+
+                    <div className="selected-icon hotel-icon">
+                      <FaCheckCircle />
+                    </div>
+
+                    <div className="selected-info">
+
+                      <span>
+                        SELECTED HOTEL
+                      </span>
+
+                      <strong>
+                        {selectedHotel.name ||
+                          "Hotel"}
+                      </strong>
+
+                      <small>
+                        {selectedHotel.location ||
+                          form.destination}
+                        {" • "}PKR{" "}
+                        {Number(
+                          selectedHotel.price_per_night ||
+                            0
+                        ).toLocaleString()}
+                        {" / night"}
+                      </small>
+
+                    </div>
+
+                    <strong className="selected-price">
+                      PKR{" "}
+                      {Number(
+                        selectedHotel.price_per_night ||
+                          0
+                      ).toLocaleString()}
+                      /night
+                    </strong>
+
+                  </div>
+
+                )}
+
+
+                {hotelSearched && (
+
+                  <div className="service-results">
+
+                    {hotelLoading ? (
+
+                      <div className="loading-box">
+
+                        <FaSpinner className="spin" />
+
+                        Finding hotels...
+
+                      </div>
+
+                    ) : hotelResults.length === 0 ? (
+
+                      !hotelError && (
+
+                        <div className="empty-box">
+
+                          <FaHotel />
+
+                          <strong>
+                            No hotel found
+                          </strong>
+
+                          <span>
+                            No hotel is currently
+                            available in{" "}
+                            {form.destination}.
+                          </span>
+
+                        </div>
+
+                      )
+
+                    ) : (
+
+                      <>
+
+                        <div className="result-count">
+
+                          {hotelResults.length}{" "}
+                          hotel
+                          {hotelResults.length !== 1
+                            ? "s"
+                            : ""}{" "}
+                          found
+
+                        </div>
+
+
+                        {hotelResults.map(
+                          (
+                            hotel,
+                            index
+                          ) => {
+
+                            const price =
+                              Number(
+                                hotel.price_per_night ||
+                                  0
+                              );
+
+                            const selected =
+                              selectedHotel ===
+                              hotel;
+
+                            return (
+
+                              <div
+                                className={`service-option ${
+                                  selected
+                                    ? "selected"
+                                    : ""
+                                }`}
+                                key={
+                                  hotel.id ||
+                                  index
+                                }
+                              >
+
+                                <div className="service-left">
+
+                                  <div className="option-icon hotel-icon">
+                                    <FaHotel />
+                                  </div>
+
+                                  <div className="option-info">
+
+                                    <strong>
+                                      {hotel.name ||
+                                        "Hotel"}
+                                    </strong>
+
+                                    <span>
+                                      {hotel.location ||
+                                        form.destination}
+                                    </span>
+
+                                    <small>
+                                      PKR{" "}
+                                      {price.toLocaleString()}
+                                      {" / night"}
+                                    </small>
+
+                                  </div>
+
+                                </div>
+
+
+                                <div className="option-price">
+
+                                  <strong>
+                                    PKR{" "}
+                                    {price.toLocaleString()}
+                                  </strong>
+
+                                  <button
+                                    type="button"
+                                    onClick={() =>
+                                      selectHotel(
+                                        hotel
+                                      )
+                                    }
+                                  >
+                                    {selected
+                                      ? "Selected"
+                                      : "Use"}
+                                  </button>
+
+                                </div>
+
+                              </div>
+
+                            );
+                          }
+                        )}
+
+                      </>
+
+                    )}
+
+                  </div>
+
+                )}
+
+              </div>
+
+
+
+              {/* =================================================
+                  FOOD BUDGET
+              ================================================= */}
+
+              <div className="food-budget-card">
+
+                <div className="food-budget-header">
+
+                  <div className="expense-icon">
+                    <FaUtensils />
+                  </div>
+
+                  <div>
+
+                    <h3>
+                      Food Budget
+                    </h3>
+
+                    <p>
+                      Estimated meals for{" "}
+                      {form.passengers} traveler
+                      {Number(form.passengers) !== 1
+                        ? "s"
+                        : ""}{" "}
+                      ×{" "}
+                      {form.days} day
+                      {Number(form.days) !== 1
+                        ? "s"
+                        : ""}
+                    </p>
+
+                  </div>
+
+                </div>
+
+
+                <div className="meal-breakdown">
+
+
+                  {/* BREAKFAST */}
+
+                  <div className="meal-row">
+
+                    <span>
+                      🍳 Breakfast
+                    </span>
+
+                    <strong>
+
+                      {foodBreakdown.breakfastIncluded
+                        ? "Included"
+                        : `PKR ${Number(
+                            foodBreakdown.breakfast || 0
+                          ).toLocaleString()}`}
+
+                    </strong>
+
+                  </div>
+
+
+                  {/* LUNCH */}
+
+                  <div className="meal-row">
+
+                    <span>
+                      🍛 Lunch
+                    </span>
+
+                    <strong>
+                      PKR{" "}
+                      {Number(
+                        foodBreakdown.lunch || 0
+                      ).toLocaleString()}
+                    </strong>
+
+                  </div>
+
+
+                  {/* DINNER */}
+
+                  <div className="meal-row">
+
+                    <span>
+                      🍽️ Dinner
+                    </span>
+
+                    <strong>
+
+                      {foodBreakdown.dinnerIncluded
+                        ? "Included"
+                        : `PKR ${Number(
+                            foodBreakdown.dinner || 0
+                          ).toLocaleString()}`}
+
+                    </strong>
+
+                  </div>
+
+                </div>
+
+
+                {/* TOTAL */}
+
+                <div className="food-total-row">
+
+                  <span>
+                    Estimated Food Cost
+                  </span>
+
+                  <strong>
+                    PKR{" "}
+                    {Number(
+                      form.food || 0
+                    ).toLocaleString()}
+                  </strong>
+
+                </div>
+
+
+                <small className="food-note">
+
+                  Food prices are estimates and do
+                  not represent live restaurant pricing.
+
+                </small>
+
+              </div>
+
+
+
+              {/* =================================================
+                  OTHER EXPENSES
+              ================================================= */}
+
+              <div className="expense-heading">
+
+                <h3>
+                  Other Estimated Expenses
+                </h3>
+
+                <p>
+                  Transport and hotel are connected
+                  automatically with your services.
+                </p>
+
+              </div>
+
+
+              <div className="expense-grid">
+
+
+                <ExpenseInput
+                  icon={<FaTicketAlt />}
+                  title="Activities"
+                  value={form.activities}
+                  onChange={(value) =>
+                    updateField(
+                      "activities",
+                      value
+                    )
+                  }
+                />
+
+
+                <ExpenseInput
+                  icon={<FaPlusCircle />}
+                  title="Other Expenses"
+                  value={form.other}
+                  onChange={(value) =>
+                    updateField(
+                      "other",
+                      value
+                    )
+                  }
+                />
+
+
+              </div>
+
+
+
+              {/* =================================================
+                  BUDGET SUMMARY
+              ================================================= */}
+
+              <div className="budget-summary">
+
+                <div className="summary-heading">
+
+                  <div className="heading-icon">
+                    <FaCalculator />
+                  </div>
+
+                  <div>
+
+                    <h3>
+                      Trip Cost Summary
+                    </h3>
+
+                    <p>
+                      Estimated cost based on your selections
+                    </p>
+
+                  </div>
+
+                </div>
+
+
+                <div className="summary-grid">
+
+
+                  {/* TRANSPORT */}
+
+                  <div className="summary-item">
+
+                    <span>
+                      <FaBus />
+                      Transport
+                    </span>
+
+                    <strong>
+                      PKR{" "}
+                      {Number(
+                        form.transport || 0
+                      ).toLocaleString()}
+                    </strong>
+
+                  </div>
+
+
+                  {/* HOTEL */}
+
+                  <div className="summary-item">
+
+                    <span>
+                      <FaHotel />
+                      Hotel
+                    </span>
+
+                    <strong>
+                      PKR{" "}
+                      {Number(
+                        form.hotel || 0
+                      ).toLocaleString()}
+                    </strong>
+
+                  </div>
+
+
+                  {/* FOOD */}
+
+                  <div className="summary-item">
+
+                    <span>
+                      <FaUtensils />
+                      Food
+                    </span>
+
+                    <strong>
+                      PKR{" "}
+                      {Number(
+                        form.food || 0
+                      ).toLocaleString()}
+                    </strong>
+
+                  </div>
+
+
+                  {/* ACTIVITIES */}
+
+                  <div className="summary-item">
+
+                    <span>
+                      <FaTicketAlt />
+                      Activities
+                    </span>
+
+                    <strong>
+                      PKR{" "}
+                      {Number(
+                        form.activities || 0
+                      ).toLocaleString()}
+                    </strong>
+
+                  </div>
+
+
+                  {/* OTHER */}
+
+                  <div className="summary-item">
+
+                    <span>
+                      <FaPlusCircle />
+                      Other
+                    </span>
+
+                    <strong>
+                      PKR{" "}
+                      {Number(
+                        form.other || 0
+                      ).toLocaleString()}
+                    </strong>
+
+                  </div>
+
+                </div>
+
+
+                {/* TOTAL */}
+
+                <div className="total-row">
+
+                  <span>
+                    Total Estimated Cost
+                  </span>
+
+                  <strong>
+                    PKR{" "}
+                    {totalCost.toLocaleString()}
+                  </strong>
+
+                </div>
+
+
+                {/* DETAILS */}
+
+                <div className="cost-details">
+
+
+                  <div>
+
+                    <span>
+                      Per Person
+                    </span>
+
+                    <strong>
+                      PKR{" "}
+                      {perPerson.toLocaleString()}
+                    </strong>
+
+                  </div>
+
+
+                  <div>
+
+                    <span>
+                      Per Day
+                    </span>
+
+                    <strong>
+                      PKR{" "}
+                      {dailyCost.toLocaleString()}
+                    </strong>
+
+                  </div>
+
+
+                  <div>
+
+                    <span>
+                      Remaining Budget
+                    </span>
+
+                    <strong
+                      className={
+                        remainingBudget >= 0
+                          ? "positive"
+                          : "negative"
+                      }
+                    >
+                      PKR{" "}
+                      {Math.abs(
+                        remainingBudget
+                      ).toLocaleString()}
+                    </strong>
+
+                  </div>
+
+                </div>
+
+
+                {/* STATUS */}
+
+                <div
+                  className={`budget-status ${budgetStatus.className}`}
+                >
+                  {budgetStatus.text}
+                </div>
+
+              </div>
+
+
+
+              {/* =================================================
+                  ACTION BUTTONS
+              ================================================= */}
+
+              <div className="planner-actions">
+
+                <button
+                  type="button"
+                  className="plan-button"
+                  onClick={generatePlan}
+                  disabled={aiLoading}
+                >
+
+                  {aiLoading ? (
+
+                    <>
+                      <FaSpinner className="spin" />
+                      Creating Your AI Plan...
+                    </>
+
+                  ) : (
+
+                    <>
+                      <FaRobot />
+                      Generate AI Budget Plan
+                      <FaArrowRight />
+                    </>
+
+                  )}
+
+                </button>
+
+
+                <button
+                  type="button"
+                  className="reset-button"
+                  onClick={resetPlanner}
+                >
+                  Reset Planner
+                </button>
+
+              </div>
+
+
+              {aiError && (
+
+                <div className="service-error ai-error">
+
+                  <FaExclamationTriangle />
+
+                  <span>
+                    {aiError}
+                  </span>
+
+                </div>
+
+              )}
+
+            </div>
+
+
+
+            {/* =================================================
+                RIGHT SIDEBAR
+            ================================================= */}
+
+            <div className="planner-sidebar">
+
+
+              <div className="sidebar-card">
+
+                <div className="sidebar-icon">
+                  <FaRoute />
+                </div>
+
+                <h3>
+                  Smart Trip Planning
+                </h3>
+
+                <p>
+                  Select your destination, budget,
+                  transport and hotel. Our planner
+                  calculates your estimated trip cost
+                  automatically.
+                </p>
+
+
+                <div className="sidebar-feature">
+
+                  <FaCheckCircle />
+
+                  <span>
+                    Affordable transport options
+                  </span>
+
+                </div>
+
+
+                <div className="sidebar-feature">
+
+                  <FaCheckCircle />
+
+                  <span>
+                    Budget-friendly hotels
+                  </span>
+
+                </div>
+
+
+                <div className="sidebar-feature">
+
+                  <FaCheckCircle />
+
+                  <span>
+                    Breakfast, lunch and dinner estimation
+                  </span>
+
+                </div>
+
+
+                <div className="sidebar-feature">
+
+                  <FaCheckCircle />
+
+                  <span>
+                    AI-generated itinerary
+                  </span>
+
+                </div>
+
+              </div>
+
+
+
+              {/* BUDGET MINI */}
+
+              <div className="sidebar-card budget-mini-card">
+
+                <div className="mini-heading">
+
+                  <FaMoneyBillWave />
+
+                  <span>
+                    Your Budget
+                  </span>
+
+                </div>
+
+
+                <strong>
+                  PKR{" "}
+                  {Number(
+                    form.budget || 0
+                  ).toLocaleString()}
+                </strong>
+
+
+                <div className="mini-line">
+
+                  <span>
+                    Estimated Cost
+                  </span>
+
+                  <span>
+                    PKR{" "}
+                    {totalCost.toLocaleString()}
+                  </span>
+
+                </div>
+
+
+                <div className="mini-line">
+
+                  <span>
+                    Remaining
+                  </span>
+
+                  <span
+                    className={
+                      remainingBudget >= 0
+                        ? "positive"
+                        : "negative"
+                    }
                   >
-                    {loading
-                      ? "🤖 Creating your AI trip..."
-                      : "✨ Create My AI Budget Trip"}
-                  </button>
+                    PKR{" "}
+                    {Math.abs(
+                      remainingBudget
+                    ).toLocaleString()}
+                  </span>
 
-                </form>
+                </div>
 
               </div>
 
@@ -452,238 +3041,117 @@ function BudgetTrip() {
 
           </div>
 
-        </div>
-      )}
 
-      {/* =================================================
-          RESULT
-      ================================================= */}
 
-      {result && (
+          {/* =====================================================
+              TRIP RESULTS
+          ===================================================== */}
 
-        <div className="row justify-content-center">
+          {planned && (
 
-          <div className="col-lg-10">
-
-            {/* SUMMARY */}
-
-            <div className="card shadow border-0 mb-4">
-
-              <div className="card-body p-4">
-
-                <div className="d-flex justify-content-between align-items-center flex-wrap">
-
-                  <div>
-
-                    <h2 className="fw-bold mb-1">
-                      🌍 {result.location}
-                    </h2>
-
-                    <p className="text-muted mb-0">
-                      {result.days} days ·{" "}
-                      {result.persons} travelers
-                    </p>
-
-                  </div>
-
-                  <div className="text-end mt-3 mt-md-0">
-
-                    <small className="text-muted">
-                      Total Budget
-                    </small>
-
-                    <h3 className="fw-bold text-primary mb-0">
-                      Rs. {formatMoney(result.budget)}
-                    </h3>
-
-                  </div>
-
-                </div>
-
-              </div>
-
-            </div>
-
-            {/* BUDGET BREAKDOWN */}
-
-            <div className="card shadow-sm border-0 mb-4">
-
-              <div className="card-body p-4">
-
-                <h4 className="fw-bold mb-4">
-                  💰 Budget Breakdown
-                </h4>
-
-                <div className="row g-3">
-
-                  <div className="col-md-4">
-                    <div className="p-3 bg-light rounded">
-                      <small className="text-muted">
-                        🏨 Hotel
-                      </small>
-                      <h5 className="fw-bold mb-0">
-                        Rs. {formatMoney(result.hotel_cost)}
-                      </h5>
-                    </div>
-                  </div>
-
-                  <div className="col-md-4">
-                    <div className="p-3 bg-light rounded">
-                      <small className="text-muted">
-                        🚌 Transport
-                      </small>
-                      <h5 className="fw-bold mb-0">
-                        Rs. {formatMoney(result.transport_cost)}
-                      </h5>
-                    </div>
-                  </div>
-
-                  <div className="col-md-4">
-                    <div className="p-3 bg-light rounded">
-                      <small className="text-muted">
-                        🍽️ Food
-                      </small>
-                      <h5 className="fw-bold mb-0">
-                        Rs. {formatMoney(result.food_cost)}
-                      </h5>
-                    </div>
-                  </div>
-
-                  <div className="col-md-4">
-                    <div className="p-3 bg-light rounded">
-                      <small className="text-muted">
-                        🎟️ Activities
-                      </small>
-                      <h5 className="fw-bold mb-0">
-                        Rs. {formatMoney(result.activities_cost)}
-                      </h5>
-                    </div>
-                  </div>
-
-                  <div className="col-md-4">
-                    <div className="p-3 bg-light rounded">
-                      <small className="text-muted">
-                        🧾 Miscellaneous
-                      </small>
-                      <h5 className="fw-bold mb-0">
-                        Rs.{" "}
-                        {formatMoney(
-                          result.miscellaneous_cost
-                        )}
-                      </h5>
-                    </div>
-                  </div>
-
-                  <div className="col-md-4">
-                    <div className="p-3 bg-primary text-white rounded">
-                      <small>
-                        Total Cost
-                      </small>
-                      <h5 className="fw-bold mb-0">
-                        Rs.{" "}
-                        {formatMoney(
-                          result.total_cost
-                        )}
-                      </h5>
-                    </div>
-                  </div>
-
-                </div>
-
-              </div>
-
-            </div>
-
-            {/* STATUS */}
-
-            <div
-              className={`alert ${
-                result.budget_status === "Over Budget"
-                  ? "alert-danger"
-                  : result.budget_status ===
-                    "Near Budget Limit"
-                  ? "alert-warning"
-                  : "alert-success"
-              }`}
+            <section
+              id="trip-results"
+              className="trip-results"
             >
 
-              <strong>
-                Budget Status:
-              </strong>{" "}
 
-              {result.budget_status}
+              <div className="results-header">
 
-              <span className="float-end">
+                <div>
 
-                Remaining: Rs.{" "}
-                {formatMoney(
-                  result.remaining_budget
-                )}
+                  <span className="results-badge">
 
-              </span>
+                    <FaRobot />
 
-            </div>
+                    AI GENERATED
 
-            {/* ITINERARY */}
+                  </span>
 
-            <div className="card shadow-sm border-0">
 
-              <div className="card-body p-4">
+                  <h2>
+                    Your {form.destination} Trip Plan
+                  </h2>
 
-                <h4 className="fw-bold mb-4">
-                  🗓️ AI Trip Itinerary
-                </h4>
 
-                {result.itinerary.map(
-                  (day) => (
+                  <p>
+
+                    {form.days} days •{" "}
+                    {form.passengers} passengers •{" "}
+                    Budget: PKR{" "}
+                    {Number(
+                      form.budget || 0
+                    ).toLocaleString()}
+
+                  </p>
+
+                </div>
+
+              </div>
+
+
+
+              {/* =================================================
+                  ITINERARY
+              ================================================= */}
+
+              <div className="itinerary-list">
+
+                {tripPlan.length === 0 ? (
+
+                  <div className="empty-box">
+
+                    <FaRoute />
+
+                    <strong>
+                      No itinerary available
+                    </strong>
+
+                    <span>
+                      Please try generating your
+                      trip plan again.
+                    </span>
+
+                  </div>
+
+                ) : (
+
+                  tripPlan.map((day) => (
 
                     <div
+                      className="day-card"
                       key={day.day}
-                      className="mb-4"
                     >
 
-                      <h5 className="fw-bold">
+                      <div className="day-number">
                         Day {day.day}
-                      </h5>
+                      </div>
 
-                      {day.places.length === 0 ? (
 
-                        <p className="text-muted">
-                          No additional places
-                          available for this day.
-                        </p>
+                      <div className="day-content">
 
-                      ) : (
+                        <h3>
+                          {day.title}
+                        </h3>
 
-                        <div className="row g-3">
 
-                          {day.places.map(
-                            (place) => (
+                        <div className="activity-list">
+
+                          {day.activities.map(
+                            (
+                              activity,
+                              index
+                            ) => (
 
                               <div
-                                className="col-md-4"
-                                key={place.id}
+                                className="activity-item"
+                                key={index}
                               >
 
-                                <div className="card h-100 border">
+                                <FaCheckCircle />
 
-                                  <div className="card-body">
-
-                                    <h6 className="fw-bold">
-                                      📍 {place.name}
-                                    </h6>
-
-                                    <p className="small text-muted mb-1">
-                                      {place.location}
-                                    </p>
-
-                                    <span className="badge bg-secondary">
-                                      {place.category}
-                                    </span>
-
-                                  </div>
-
-                                </div>
+                                <span>
+                                  {activity}
+                                </span>
 
                               </div>
 
@@ -692,38 +3160,312 @@ function BudgetTrip() {
 
                         </div>
 
-                      )}
+                      </div>
 
                     </div>
 
-                  )
+                  ))
+
                 )}
 
               </div>
 
-            </div>
 
-            {/* NEW PLAN */}
 
-            <div className="text-center mt-4">
+              {/* =================================================
+                  FOOD BREAKDOWN RESULT
+              ================================================= */}
 
-              <button
-                className="btn btn-outline-primary"
-                onClick={() => setResult(null)}
-              >
-                🔄 Create Another Trip
-              </button>
+              <div className="food-result-card">
 
-            </div>
+                <div className="food-result-heading">
 
-          </div>
+                  <FaUtensils />
+
+                  <div>
+
+                    <h3>
+                      Food Budget Breakdown
+                    </h3>
+
+                    <p>
+                      Estimated meal expenses for
+                      your trip
+                    </p>
+
+                  </div>
+
+                </div>
+
+
+                <div className="food-result-grid">
+
+
+                  <div className="food-result-item">
+
+                    <span>
+                      🍳 Breakfast
+                    </span>
+
+                    <strong>
+
+                      {foodBreakdown.breakfastIncluded
+                        ? "Included"
+                        : `PKR ${Number(
+                            foodBreakdown.breakfast || 0
+                          ).toLocaleString()}`}
+
+                    </strong>
+
+                  </div>
+
+
+                  <div className="food-result-item">
+
+                    <span>
+                      🍛 Lunch
+                    </span>
+
+                    <strong>
+                      PKR{" "}
+                      {Number(
+                        foodBreakdown.lunch || 0
+                      ).toLocaleString()}
+                    </strong>
+
+                  </div>
+
+
+                  <div className="food-result-item">
+
+                    <span>
+                      🍽️ Dinner
+                    </span>
+
+                    <strong>
+
+                      {foodBreakdown.dinnerIncluded
+                        ? "Included"
+                        : `PKR ${Number(
+                            foodBreakdown.dinner || 0
+                          ).toLocaleString()}`}
+
+                    </strong>
+
+                  </div>
+
+
+                  <div className="food-result-total">
+
+                    <span>
+                      Total Food Cost
+                    </span>
+
+                    <strong>
+                      PKR{" "}
+                      {Number(
+                        form.food || 0
+                      ).toLocaleString()}
+                    </strong>
+
+                  </div>
+
+                </div>
+
+
+                <p className="food-note">
+
+                  Note: Food prices are estimates and
+                  are not intended to represent live
+                  restaurant pricing.
+
+                </p>
+
+              </div>
+
+
+
+              {/* =================================================
+                  FINAL SUMMARY
+              ================================================= */}
+
+              <div className="final-trip-summary">
+
+
+                <div className="final-summary-item">
+
+                  <FaBus />
+
+                  <div>
+
+                    <span>
+                      Transport
+                    </span>
+
+                    <strong>
+                      PKR{" "}
+                      {Number(
+                        form.transport || 0
+                      ).toLocaleString()}
+                    </strong>
+
+                  </div>
+
+                </div>
+
+
+                <div className="final-summary-item">
+
+                  <FaHotel />
+
+                  <div>
+
+                    <span>
+                      Hotel
+                    </span>
+
+                    <strong>
+                      PKR{" "}
+                      {Number(
+                        form.hotel || 0
+                      ).toLocaleString()}
+                    </strong>
+
+                  </div>
+
+                </div>
+
+
+                <div className="final-summary-item">
+
+                  <FaUtensils />
+
+                  <div>
+
+                    <span>
+                      Food
+                    </span>
+
+                    <strong>
+                      PKR{" "}
+                      {Number(
+                        form.food || 0
+                      ).toLocaleString()}
+                    </strong>
+
+                  </div>
+
+                </div>
+
+
+                <div className="final-summary-item">
+
+                  <FaTicketAlt />
+
+                  <div>
+
+                    <span>
+                      Activities
+                    </span>
+
+                    <strong>
+                      PKR{" "}
+                      {Number(
+                        form.activities || 0
+                      ).toLocaleString()}
+                    </strong>
+
+                  </div>
+
+                </div>
+
+
+                <div className="final-total">
+
+                  <span>
+                    Total Estimated Trip Cost
+                  </span>
+
+                  <strong>
+                    PKR{" "}
+                    {totalCost.toLocaleString()}
+                  </strong>
+
+                </div>
+
+              </div>
+
+            </section>
+
+          )}
 
         </div>
 
-      )}
+      </section>
 
     </div>
   );
 }
 
+
+/* =============================================================
+   EXPENSE INPUT COMPONENT
+============================================================= */
+
+function ExpenseInput({
+  icon,
+  title,
+  value,
+  onChange,
+}) {
+
+  return (
+
+    <div className="expense-input">
+
+      <div className="expense-icon">
+        {icon}
+      </div>
+
+
+      <div className="expense-content">
+
+        <label>
+          {title}
+        </label>
+
+
+        <div className="expense-field">
+
+          <span>
+            PKR
+          </span>
+
+          <input
+            type="number"
+            min="0"
+            value={
+              value || ""
+            }
+            placeholder="0"
+            onChange={(e) =>
+              onChange(
+                Number(
+                  e.target.value || 0
+                )
+              )
+            }
+          />
+
+        </div>
+
+      </div>
+
+    </div>
+
+  );
+}
+
+
 export default BudgetTrip;
+

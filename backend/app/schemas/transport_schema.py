@@ -1,3 +1,4 @@
+
 from datetime import datetime
 
 from pydantic import BaseModel, Field
@@ -172,16 +173,8 @@ class TransportResponse(BaseModel):
 
     user_id: int | None = None
 
-    # =====================================================
-    # TRIP
-    # =====================================================
-
     trip_id: int | None = None
     trip_stop_id: int | None = None
-
-    # =====================================================
-    # TRANSPORT
-    # =====================================================
 
     transport_type: str | None = None
     vehicle_type: str | None = None
@@ -189,72 +182,33 @@ class TransportResponse(BaseModel):
     company_name: str | None = None
     company: str | None = None
 
-    # =====================================================
-    # ROUTE
-    # =====================================================
-
     route: str | None = None
 
     from_location: str | None = None
     to_location: str | None = None
 
-    # =====================================================
-    # TIMING
-    # =====================================================
-
     departure_time: str | None = None
     arrival_time: str | None = None
-
-    # =====================================================
-    # SEATS
-    # =====================================================
 
     total_seats: int | None = None
     available_seats: int | None = None
     capacity: int | None = None
     passengers: int | None = None
 
-    # =====================================================
-    # PRICE
-    # =====================================================
-
     price_per_person: float | None = None
     total_price: float | None = None
 
-    # =====================================================
-    # JOURNEY
-    # =====================================================
-
     journey_type: str | None = None
 
-    # =====================================================
-    # AVAILABILITY
-    # =====================================================
-
     available: int | None = None
-    is_active: bool | None = None
 
-    # =====================================================
-    # STATUS
-    # =====================================================
+    is_active: bool | None = None
 
     status: str | None = None
 
-    # =====================================================
-    # CONTACT
-    # =====================================================
-
     phone: str | None = None
 
-    # =====================================================
-    # CREATED
-    # =====================================================
-
     created_at: datetime
-
-    # =====================================================
-    # SQLALCHEMY
-    # =====================================================
 
     class Config:
         from_attributes = True
@@ -266,15 +220,7 @@ class TransportResponse(BaseModel):
 
 class TransportBookingCreate(BaseModel):
 
-    # =====================================================
-    # TRANSPORT
-    # =====================================================
-
     transport_id: int
-
-    # =====================================================
-    # PASSENGERS
-    # =====================================================
 
     passengers: int = Field(
         default=1,
@@ -289,51 +235,49 @@ class TransportBookingCreate(BaseModel):
 class TransportBookingResponse(BaseModel):
 
     # =====================================================
-    # ID
+    # BOOKING
     # =====================================================
 
     id: int
 
-    # =====================================================
-    # USER
-    # =====================================================
-
     user_id: int
-
-    # =====================================================
-    # TRANSPORT
-    # =====================================================
 
     transport_id: int
 
     # =====================================================
-    # PASSENGERS
+    # TRANSPORT DETAILS
+    # =====================================================
+
+    transport_company: str | None = None
+
+    transport_vehicle: str | None = None
+
+    transport_type: str | None = None
+
+    transport_from: str | None = None
+
+    transport_to: str | None = None
+
+    transport_route: str | None = None
+
+    departure_time: str | None = None
+
+    arrival_time: str | None = None
+
+    # =====================================================
+    # BOOKING DETAILS
     # =====================================================
 
     passengers: int
 
-    # =====================================================
-    # PRICE
-    # =====================================================
-
     price_per_person: float
-    total_price: float
 
-    # =====================================================
-    # STATUS
-    # =====================================================
+    total_price: float
 
     status: str
 
-    # =====================================================
-    # CREATED
-    # =====================================================
-
     created_at: datetime
-
-    # =====================================================
-    # SQLALCHEMY
-    # =====================================================
 
     class Config:
         from_attributes = True
+

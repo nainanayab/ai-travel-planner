@@ -9,7 +9,6 @@ from app.utils.maps import generate_google_maps_link
 
 def create_place(db: Session, place: PlaceCreate):
 
-    # Prevent duplicate places
     existing_place = db.query(Place).filter(
         Place.name.ilike(place.name)
     ).first()
@@ -34,10 +33,18 @@ def create_place(db: Session, place: PlaceCreate):
     return new_place
 
 
-
 def get_places(db: Session):
 
-    places = db.query(Place).all()
+    places = (
+        db.query(Place)
+        .order_by(
+            Place.location.ilike("%Bahawalpur%").desc(),
+            Place.location.ilike("%Lahore%").desc(),
+            Place.location.ilike("%Multan%").desc(),
+            Place.id.asc()
+        )
+        .all()
+    )
 
     result = []
 
@@ -59,7 +66,6 @@ def get_places(db: Session):
         )
 
     return result
-
 
 
 def get_place(db: Session, place_id: int):
@@ -88,7 +94,6 @@ def get_place(db: Session, place_id: int):
     }
 
 
-
 def search_places(
     db: Session,
     location: str = None,
@@ -99,16 +104,19 @@ def search_places(
 
     if location:
         query = query.filter(
-            Place.location.ilike(f"%{location}%")
+            Place.location.ilike(
+                f"%{location}%"
+            )
         )
 
     if category:
         query = query.filter(
-            Place.category.ilike(f"%{category}%")
+            Place.category.ilike(
+                f"%{category}%"
+            )
         )
 
     return query.all()
-
 
 
 def update_place(
@@ -138,7 +146,6 @@ def update_place(
     return place
 
 
-
 def delete_place(
     db: Session,
     place_id: int
@@ -160,7 +167,6 @@ def delete_place(
     }
 
 
-
 def get_nearby_places(
     db: Session,
     latitude: float,
@@ -174,7 +180,10 @@ def get_nearby_places(
 
     for place in places:
 
-        if place.latitude is None or place.longitude is None:
+        if (
+            place.latitude is None
+            or place.longitude is None
+        ):
             continue
 
         distance = calculate_distance(

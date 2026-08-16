@@ -1,4 +1,3 @@
-
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
@@ -7,20 +6,10 @@ from app.db.database import Base, engine
 
 
 # =========================================================
-# MODELS
+# LOAD ALL MODELS
 # =========================================================
 
-from app.models import place
-from app.models import preference
-from app.models import user
-from app.models import favorite
-from app.models import booking
-from app.models import review
-from app.models import trip
-from app.models import trip_stop
-from app.models import hotel
-from app.models import transport
-from app.models import transport_booking
+import app.models
 
 
 # =========================================================
@@ -52,14 +41,19 @@ from app.routers.budget_trip_router import (
     router as budget_trip_router
 )
 
+from app.routers.budget_transport_router import (
+    router as budget_transport_router
+)
+
 
 # =========================================================
-# FASTAPI APP
+# FASTAPI APPLICATION
 # =========================================================
 
 app = FastAPI(
     title="AI Tourism Platform",
     version="1.0.0",
+    description="AI-powered tourism and travel management platform",
 )
 
 
@@ -91,10 +85,11 @@ app.add_middleware(
     CORSMiddleware,
 
     allow_origins=[
-        "http://localhost:5174",
-        "http://127.0.0.1:5174",
         "http://localhost:5173",
         "http://127.0.0.1:5173",
+
+        "http://localhost:5174",
+        "http://127.0.0.1:5174",
     ],
 
     allow_credentials=True,
@@ -106,48 +101,150 @@ app.add_middleware(
 
 
 # =========================================================
-# ROUTERS
+# REGISTER ROUTERS
 # =========================================================
+
+# ---------------------------------------------------------
+# USER
+# ---------------------------------------------------------
 
 app.include_router(user_router)
 
+
+# ---------------------------------------------------------
+# PLACES
+# ---------------------------------------------------------
+
 app.include_router(place_router)
+
+
+# ---------------------------------------------------------
+# ADMIN
+# ---------------------------------------------------------
 
 app.include_router(admin_router)
 
+
+# ---------------------------------------------------------
+# USER PREFERENCES
+# ---------------------------------------------------------
+
 app.include_router(preference_router)
+
+
+# ---------------------------------------------------------
+# AI CHAT
+# ---------------------------------------------------------
 
 app.include_router(chat_router)
 
+
+# ---------------------------------------------------------
+# REVIEWS
+# ---------------------------------------------------------
+
 app.include_router(review_router)
+
+
+# ---------------------------------------------------------
+# FAVORITES / WISHLIST
+# ---------------------------------------------------------
 
 app.include_router(favorite_router)
 
+
+# ---------------------------------------------------------
+# BOOKINGS
+# ---------------------------------------------------------
+
 app.include_router(booking_router)
+
+
+# ---------------------------------------------------------
+# HOTELS
+# ---------------------------------------------------------
 
 app.include_router(hotel_router)
 
+
+# ---------------------------------------------------------
+# RECOMMENDATIONS
+# ---------------------------------------------------------
+
 app.include_router(recommendation_router)
+
+
+# ---------------------------------------------------------
+# TRIPS
+# ---------------------------------------------------------
 
 app.include_router(trip_router)
 
+
+# ---------------------------------------------------------
+# TRIP STOPS
+# ---------------------------------------------------------
+
 app.include_router(trip_stop_router)
+
+
+# ---------------------------------------------------------
+# AI TRIP PLANNER
+# ---------------------------------------------------------
 
 app.include_router(ai_trip_router)
 
+
+# ---------------------------------------------------------
+# SAVE AI TRIP
+# ---------------------------------------------------------
+
 app.include_router(ai_save_router)
+
+
+# ---------------------------------------------------------
+# WEATHER
+# ---------------------------------------------------------
 
 app.include_router(weather_router)
 
+
+# ---------------------------------------------------------
+# TRANSPORT
+# ---------------------------------------------------------
+
 app.include_router(transport_router)
+
+
+# ---------------------------------------------------------
+# TRANSPORT BOOKINGS
+# ---------------------------------------------------------
 
 app.include_router(transport_booking_router)
 
+
+# ---------------------------------------------------------
+# BUDGET TRIP
+# ---------------------------------------------------------
+
+app.include_router(budget_trip_router)
+
+
+# ---------------------------------------------------------
+# BUDGET TRANSPORT
+# ---------------------------------------------------------
+
+app.include_router(budget_transport_router)
+
+
 # =========================================================
-# AI BUDGET TRIP
+# ROOT ENDPOINT
 # =========================================================
 
-app.include_router(
-    budget_trip_router
-)
+@app.get("/")
+def root():
 
+    return {
+        "message": "AI Tourism Platform API is running",
+        "status": "success"
+    }

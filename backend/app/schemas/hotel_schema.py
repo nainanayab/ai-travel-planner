@@ -5,6 +5,7 @@ from pydantic import BaseModel, ConfigDict
 
 
 class HotelCreate(BaseModel):
+
     name: str
     location: str
 
@@ -22,9 +23,28 @@ class HotelCreate(BaseModel):
     latitude: Optional[float] = None
     longitude: Optional[float] = None
 
+    # =====================================================
+    # FACILITIES
+    # =====================================================
+
+    breakfast_included: bool = True
+    dinner_included: bool = True
+    wifi_included: bool = True
+
+    # =====================================================
+    # MEAL PRICES
+    # =====================================================
+
+    breakfast_price: float = 0
+    dinner_price: float = 0
+
 
 class HotelResponse(HotelCreate):
+
     id: int
+
     created_at: Optional[datetime] = None
 
-    model_config = ConfigDict(from_attributes=True)
+    model_config = ConfigDict(
+        from_attributes=True
+    )

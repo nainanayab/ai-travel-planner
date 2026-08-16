@@ -4,6 +4,10 @@ from app.models.hotel import Hotel
 from app.schemas.hotel_schema import HotelCreate
 
 
+# =========================================================
+# CREATE HOTEL
+# =========================================================
+
 def create_hotel(
     db: Session,
     hotel_data: HotelCreate
@@ -21,6 +25,14 @@ def create_hotel(
         email=hotel_data.email,
         latitude=hotel_data.latitude,
         longitude=hotel_data.longitude,
+
+        # -------------------------------------------------
+        # INCLUDED FACILITIES
+        # -------------------------------------------------
+
+        breakfast_included=hotel_data.breakfast_included,
+        dinner_included=hotel_data.dinner_included,
+        wifi_included=hotel_data.wifi_included,
     )
 
     db.add(hotel)
@@ -30,11 +42,19 @@ def create_hotel(
     return hotel
 
 
+# =========================================================
+# GET ALL HOTELS
+# =========================================================
+
 def get_hotels(db: Session):
     return db.query(Hotel).order_by(
         Hotel.id.desc()
     ).all()
 
+
+# =========================================================
+# GET SINGLE HOTEL
+# =========================================================
 
 def get_hotel(
     db: Session,
@@ -44,6 +64,10 @@ def get_hotel(
         Hotel.id == hotel_id
     ).first()
 
+
+# =========================================================
+# SEARCH HOTELS
+# =========================================================
 
 def search_hotels(
     db: Session,
@@ -55,6 +79,10 @@ def search_hotels(
         | Hotel.category.ilike(f"%{search}%")
     ).all()
 
+
+# =========================================================
+# UPDATE HOTEL
+# =========================================================
 
 def update_hotel(
     db: Session,
@@ -74,6 +102,10 @@ def update_hotel(
 
     return hotel
 
+
+# =========================================================
+# DELETE HOTEL
+# =========================================================
 
 def delete_hotel(
     db: Session,

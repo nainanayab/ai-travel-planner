@@ -1,11 +1,11 @@
-
 from sqlalchemy import (
     Column,
     Integer,
     String,
     Text,
     Float,
-    DateTime
+    DateTime,
+    Boolean,
 )
 from sqlalchemy.sql import func
 
@@ -13,7 +13,12 @@ from app.db.database import Base
 
 
 class Hotel(Base):
+
     __tablename__ = "hotels"
+
+    # =====================================================
+    # BASIC
+    # =====================================================
 
     id = Column(
         Integer,
@@ -80,6 +85,53 @@ class Hotel(Base):
         Float,
         nullable=True
     )
+
+    # =====================================================
+    # HOTEL FACILITIES
+    # =====================================================
+
+    breakfast_included = Column(
+        Boolean,
+        nullable=False,
+        default=True,
+        server_default="true"
+    )
+
+    dinner_included = Column(
+        Boolean,
+        nullable=False,
+        default=True,
+        server_default="true"
+    )
+
+    wifi_included = Column(
+        Boolean,
+        nullable=False,
+        default=True,
+        server_default="true"
+    )
+
+    # =====================================================
+    # OPTIONAL MEAL PRICES
+    # =====================================================
+
+    breakfast_price = Column(
+        Float,
+        nullable=False,
+        default=0,
+        server_default="0"
+    )
+
+    dinner_price = Column(
+        Float,
+        nullable=False,
+        default=0,
+        server_default="0"
+    )
+
+    # =====================================================
+    # CREATED
+    # =====================================================
 
     created_at = Column(
         DateTime(timezone=True),
