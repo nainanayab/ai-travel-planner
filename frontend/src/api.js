@@ -1,7 +1,8 @@
 import axios from "axios";
+import { BACKEND_URL } from "./config";
 
 const API = axios.create({
-  baseURL: "http://127.0.0.1:8000",
+  baseURL: BACKEND_URL,
 });
 
 API.interceptors.request.use(
@@ -16,7 +17,6 @@ API.interceptors.request.use(
   },
   (error) => Promise.reject(error)
 );
-
 
 // =========================================================
 // BUDGET TRANSPORT
@@ -40,6 +40,5 @@ export const searchAffordableTransport = async (
 
   return response.data;
 };
-
 
 export default API;

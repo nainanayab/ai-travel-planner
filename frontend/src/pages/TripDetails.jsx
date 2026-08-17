@@ -3,6 +3,8 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import API from "../api";
 import Swal from "sweetalert2";
 
+import { BACKEND_URL } from "../config";
+
 import "./TripDetails.css";
 
 function TripDetails() {
@@ -158,6 +160,10 @@ function TripDetails() {
       return null;
     }
 
+    // -------------------------------------------------
+    // FULL URL
+    // -------------------------------------------------
+
     if (
       image.startsWith("http://") ||
       image.startsWith("https://")
@@ -165,11 +171,15 @@ function TripDetails() {
       return image;
     }
 
+    // -------------------------------------------------
+    // BACKEND STATIC IMAGE
+    // -------------------------------------------------
+
     if (image.startsWith("/")) {
-      return `http://127.0.0.1:8000${image}`;
+      return `${BACKEND_URL}${image}`;
     }
 
-    return `http://127.0.0.1:8000/${image}`;
+    return `${BACKEND_URL}/${image}`;
   };
 
   // =====================================================
@@ -189,7 +199,9 @@ function TripDetails() {
   if (loading) {
     return (
       <div className="trip-details-page">
+
         <div className="trip-details-loading">
+
           <div className="trip-spinner"></div>
 
           <h3>
@@ -199,7 +211,9 @@ function TripDetails() {
           <p>
             Please wait while we load your saved trip.
           </p>
+
         </div>
+
       </div>
     );
   }
@@ -211,7 +225,9 @@ function TripDetails() {
   if (!trip) {
     return (
       <div className="trip-details-page">
+
         <div className="trip-details-empty">
+
           <h2>
             Trip not found
           </h2>
@@ -223,7 +239,9 @@ function TripDetails() {
           <Link to="/my-trips">
             Back to My Trips
           </Link>
+
         </div>
+
       </div>
     );
   }
@@ -313,6 +331,7 @@ function TripDetails() {
         <div className="trip-summary-grid">
 
           <div className="trip-summary-card">
+
             <span>
               Start Date
             </span>
@@ -320,9 +339,11 @@ function TripDetails() {
             <strong>
               {trip.start_date || "N/A"}
             </strong>
+
           </div>
 
           <div className="trip-summary-card">
+
             <span>
               End Date
             </span>
@@ -330,9 +351,11 @@ function TripDetails() {
             <strong>
               {trip.end_date || "N/A"}
             </strong>
+
           </div>
 
           <div className="trip-summary-card">
+
             <span>
               Places
             </span>
@@ -340,9 +363,11 @@ function TripDetails() {
             <strong>
               {places.length}
             </strong>
+
           </div>
 
           <div className="trip-summary-card">
+
             <span>
               Total Cost
             </span>
@@ -350,6 +375,7 @@ function TripDetails() {
             <strong>
               Rs. {totalCost.toLocaleString()}
             </strong>
+
           </div>
 
         </div>
@@ -361,14 +387,17 @@ function TripDetails() {
         <div className="trip-details-section">
 
           <div className="trip-section-heading">
+
             <h2>
               Cost Breakdown
             </h2>
+
           </div>
 
           <div className="trip-cost-details">
 
             <div>
+
               <span>
                 Place Tickets
               </span>
@@ -377,9 +406,11 @@ function TripDetails() {
                 Rs.{" "}
                 {placeTicketTotal.toLocaleString()}
               </strong>
+
             </div>
 
             <div>
+
               <span>
                 Bus Ticket
               </span>
@@ -388,9 +419,11 @@ function TripDetails() {
                 Rs.{" "}
                 {busTicket.toLocaleString()}
               </strong>
+
             </div>
 
             <div className="trip-cost-final">
+
               <span>
                 Total
               </span>
@@ -399,6 +432,7 @@ function TripDetails() {
                 Rs.{" "}
                 {totalCost.toLocaleString()}
               </strong>
+
             </div>
 
           </div>
@@ -414,6 +448,7 @@ function TripDetails() {
           <div className="trip-section-heading">
 
             <div>
+
               <span>
                 YOUR TRAVEL PLAN
               </span>
@@ -421,6 +456,7 @@ function TripDetails() {
               <h2>
                 Places to Visit
               </h2>
+
             </div>
 
           </div>
@@ -454,6 +490,7 @@ function TripDetails() {
                     <div className="trip-place-image">
 
                       {imageUrl ? (
+
                         <img
                           src={imageUrl}
                           alt={
@@ -461,14 +498,22 @@ function TripDetails() {
                             "Tourist Place"
                           }
                           onError={(e) => {
+                            console.error(
+                              "Trip place image failed:",
+                              imageUrl
+                            );
+
                             e.currentTarget.style.display =
                               "none";
                           }}
                         />
+
                       ) : (
+
                         <div className="trip-place-no-image">
                           📍
                         </div>
+
                       )}
 
                     </div>

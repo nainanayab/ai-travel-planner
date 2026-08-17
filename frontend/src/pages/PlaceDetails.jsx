@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import API from "../api";
+import { BACKEND_URL } from "../config";
 
 import {
   FaStar,
@@ -11,8 +12,6 @@ import {
   FaCalendarAlt,
   FaPaperPlane,
 } from "react-icons/fa";
-
-const BACKEND_URL = "http://127.0.0.1:8000";
 
 function PlaceDetails() {
   const { id } = useParams();
@@ -103,133 +102,126 @@ function PlaceDetails() {
     loadReviews();
   }, [id]);
 
- // =====================================================
-// SUBMIT REVIEW
-// =====================================================
+  // =====================================================
+  // SUBMIT REVIEW
+  // =====================================================
 
-const submitReview = async (e) => {
-  e.preventDefault();
+  const submitReview = async (e) => {
+    e.preventDefault();
 
-  console.log("SUBMIT REVIEW CLICKED");
+    console.log("SUBMIT REVIEW CLICKED");
 
-  const token = localStorage.getItem("token");
+    const token = localStorage.getItem("token");
 
-  // -------------------------------------------------
-  // LOGIN CHECK
-  // -------------------------------------------------
+    // -------------------------------------------------
+    // LOGIN CHECK
+    // -------------------------------------------------
 
-  if (!token) {
-    console.log("No authentication token found.");
-    navigate("/login");
-    return;
-  }
-
-  // -------------------------------------------------
-  // VALIDATION
-  // -------------------------------------------------
-
-  if (!rating) {
-    setReviewError("Please select a rating.");
-    return;
-  }
-
-  if (!comment.trim()) {
-    setReviewError("Please write a comment.");
-    return;
-  }
-
-  try {
-    setSubmitting(true);
-    setReviewError("");
-    setReviewSuccess("");
-
-    const reviewPayload = {
-      place_id: Number(id),
-      rating: Number(rating),
-      comment: comment.trim(),
-    };
-
-    console.log(
-      "Submitting review:",
-      reviewPayload
-    );
-
-    const response = await API.post(
-      "/reviews/",
-      reviewPayload
-    );
-
-    console.log(
-      "Review Created:",
-      response.data
-    );
-
-    setReviews((currentReviews) => [
-      response.data,
-      ...currentReviews,
-    ]);
-
-    setRating(5);
-    setComment("");
-
-    setReviewSuccess(
-      "Your review has been submitted successfully!"
-    );
-
-    setTimeout(() => {
-      setReviewSuccess("");
-    }, 3000);
-
-  } catch (error) {
-
-    console.error(
-      "Submit Review Error:",
-      error
-    );
-
-    console.error(
-      "Submit Review Response:",
-      error.response?.data
-    );
-
-    console.error(
-      "Submit Review Status:",
-      error.response?.status
-    );
-
-    if (error.response?.status === 401) {
-
-      localStorage.removeItem("token");
-
-      setReviewError(
-        "Your session has expired. Please login again."
-      );
-
-      setTimeout(() => {
-        navigate("/login");
-      }, 1000);
-
+    if (!token) {
+      console.log("No authentication token found.");
+      navigate("/login");
       return;
     }
 
-    const backendMessage =
-      error.response?.data?.detail;
+    // -------------------------------------------------
+    // VALIDATION
+    // -------------------------------------------------
 
-    if (typeof backendMessage === "string") {
-      setReviewError(
-        backendMessage
-      );
-    } else {
-      setReviewError(
-        "Unable to submit your review. Please try again."
-      );
+    if (!rating) {
+      setReviewError("Please select a rating.");
+      return;
     }
 
-  } finally {
+    if (!comment.trim()) {
+      setReviewError("Please write a comment.");
+      return;
+    }
 
-    setSubmitting(false);
-  }
-};
+    try {
+      setSubmitting(true);
+      setReviewError("");
+      setReviewSuccess("");
+
+      const reviewPayload = {
+        place_id: Number(id),
+        rating: Number(rating),
+        comment: comment.trim(),
+      };
+
+      console.log(
+        "Submitting review:",
+        reviewPayload
+      );
+
+      const response = await API.post(
+        "/reviews/",
+        reviewPayload
+      );
+
+      console.log(
+        "Review Created:",
+        response.data
+      );
+
+      setReviews((currentReviews) => [
+        response.data,
+        ...currentReviews,
+      ]);
+
+      setRating(5);
+      setComment("");
+
+      setReviewSuccess(
+        "Your review has been submitted successfully!"
+      );
+
+      setTimeout(() => {
+        setReviewSuccess("");
+      }, 3000);
+    } catch (error) {
+      console.error(
+        "Submit Review Error:",
+        error
+      );
+
+      console.error(
+        "Submit Review Response:",
+        error.response?.data
+      );
+
+      console.error(
+        "Submit Review Status:",
+        error.response?.status
+      );
+
+      if (error.response?.status === 401) {
+        localStorage.removeItem("token");
+
+        setReviewError(
+          "Your session has expired. Please login again."
+        );
+
+        setTimeout(() => {
+          navigate("/login");
+        }, 1000);
+
+        return;
+      }
+
+      const backendMessage =
+        error.response?.data?.detail;
+
+      if (typeof backendMessage === "string") {
+        setReviewError(backendMessage);
+      } else {
+        setReviewError(
+          "Unable to submit your review. Please try again."
+        );
+      }
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   // =====================================================
   // FORMAT DATE

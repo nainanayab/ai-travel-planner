@@ -2,370 +2,291 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import API from "../api";
 
-
-const BACKEND_URL = "http://127.0.0.1:8000";
-
-
 function Wishlist() {
-
-
   const [wishlist, setWishlist] = useState([]);
-
   const [loading, setLoading] = useState(true);
 
+  // =====================================================
+  // GET IMAGE URL
+  // =====================================================
 
-
-
-  const fetchWishlist = async () => {
-
-
-    const token = localStorage.getItem("token");
-
-
-    if (!token) {
-
-      setLoading(false);
-      return;
-
+  const getImageUrl = (image) => {
+    if (!image) {
+      return null;
     }
 
-
-
-    try {
-
-
-      const response = await API.get(
-        "/favorites/"
-      );
-
-
-      console.log(
-        "Wishlist Data:",
-        response.data
-      );
-
-
-      setWishlist(response.data);
-
-
-
-    } catch(error) {
-
-
-      console.log(
-        "Wishlist Error:",
-        error.response?.data
-      );
-
-
-    } finally {
-
-
-      setLoading(false);
-
-
+    // Backend already returned a full URL
+    if (
+      image.startsWith("http://") ||
+      image.startsWith("https://")
+    ) {
+      return image;
     }
 
+    // Backend returned a path such as:
+    // /static/images/noor-mahal.jpg
+    if (image.startsWith("/")) {
+      return `${API.defaults.baseURL}${image}`;
+    }
 
+    // Backend returned a relative path
+    return `${API.defaults.baseURL}/${image}`;
   };
 
+  // =====================================================
+  // FETCH WISHLIST
+  // =====================================================
 
+  const fetchWishlist = async () => {
+    const token = localStorage.getItem("token");
 
-
-
-  useEffect(() => {
-
-    fetchWishlist();
-
-  }, []);
-
-
-
-
-
-
-  const removeWishlist = async (favoriteId) => {
-
+    if (!token) {
+      setWishlist([]);
+      setLoading(false);
+      return;
+    }
 
     try {
+      setLoading(true);
 
+      const response = await API.get("/favorites/");
 
+      console.log("Wishlist Data:", response.data);
+
+      setWishlist(
+        Array.isArray(response.data)
+          ? response.data
+          : []
+      );
+    } catch (error) {
+      console.error(
+        "Wishlist Error:",
+        error.response?.data || error.message
+      );
+
+      setWishlist([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // =====================================================
+  // LOAD WISHLIST
+  // =====================================================
+
+  useEffect(() => {
+    fetchWishlist();
+  }, []);
+
+  // =====================================================
+  // REMOVE FROM WISHLIST
+  // =====================================================
+
+  const removeWishlist = async (favoriteId) => {
+    try {
       await API.delete(
         `/favorites/${favoriteId}`
       );
 
+      alert("Removed from Wishlist ❌");
 
+      // Refresh wishlist
+      await fetchWishlist();
+    } catch (error) {
+      console.error(
+        "Remove Wishlist Error:",
+        error.response?.data || error.message
+      );
 
       alert(
-        "Removed from Wishlist ❌"
+        error.response?.data?.detail ||
+          "Unable to remove from Wishlist."
       );
-
-
-      fetchWishlist();
-
-
-
-    } catch(error) {
-
-
-      console.log(
-        error.response?.data
-      );
-
-
     }
-
-
   };
 
-
-
-
-
-
+  // =====================================================
+  // LOADING
+  // =====================================================
 
   if (loading) {
-
-
     return (
+      <div className="container mt-5 text-center">
+        <div
+          className="spinner-border text-primary"
+          role="status"
+        >
+          <span className="visually-hidden">
+            Loading...
+          </span>
+        </div>
 
-      <h3 className="text-center mt-5">
-
-        Loading wishlist...
-
-      </h3>
-
+        <h5 className="mt-3">
+          Loading wishlist...
+        </h5>
+      </div>
     );
-
-
   }
 
-
-
-
-
-
+  // =====================================================
+  // PAGE
+  // =====================================================
 
   return (
-
-
     <div className="container mt-5">
 
-
+      {/* =================================================
+          HEADER
+      ================================================= */}
 
       <h2 className="text-center mb-4">
-
         ❤️ My Wishlist
-
       </h2>
 
+      {/* =================================================
+          EMPTY WISHLIST
+      ================================================= */}
 
+      {wishlist.length === 0 ? (
+        <div className="text-center py-5">
 
-
-
-      {
-        wishlist.length === 0 ? (
-
-
-          <h4 className="text-center">
-
+          <h4>
             No favorite places yet.
-
           </h4>
 
-
-
-        ) : (
-
-
-
-          <div className="row">
-
-
-
-            {
-              wishlist.map((item)=>(
-
-
-
-                <div
-                  className="col-md-4 mb-4"
-                  key={item.id}
-                >
-
-
-
-                  <div className="card shadow h-100">
-
-
-
-
-
-
-                    {/* IMAGE */}
-
-                    {
-                      item.place?.image_url && (
-
-
-                        <img
-
-                          src={
-
-                            item.place.image_url.startsWith("http")
-
-                            ?
-
-                            item.place.image_url
-
-                            :
-
-                            `${BACKEND_URL}${item.place.image_url}`
-
-                          }
-
-
-                          className="card-img-top"
-
-
-                          alt={item.place.name}
-
-
-
-                          style={{
-
-                            height:"220px",
-
-                            objectFit:"cover"
-
-                          }}
-
-
-
-                          onError={(e)=>{
-
-
-                            e.target.src =
-                            "https://via.placeholder.com/400x220?text=No+Image";
-
-
-                          }}
-
-
-                        />
-
-
-
-                      )
-
-                    }
-
-
-
-
-
-
-
-                    <div className="card-body">
-
-
-
-                      <h4>
-
-                        {item.place?.name}
-
-                      </h4>
-
-
-
-
+          <p className="text-muted">
+            Explore places and add your
+            favorite destinations to your wishlist.
+          </p>
+
+          <Link
+            to="/places"
+            className="btn btn-primary mt-2"
+          >
+            Explore Places
+          </Link>
+
+        </div>
+      ) : (
+
+        /* =================================================
+           WISHLIST CARDS
+        ================================================= */
+
+        <div className="row">
+
+          {wishlist.map((item) => {
+
+            const place = item.place;
+
+            const imageUrl = getImageUrl(
+              place?.image_url
+            );
+
+            return (
+              <div
+                className="col-md-4 mb-4"
+                key={item.id}
+              >
+
+                <div className="card shadow h-100">
+
+                  {/* =====================================
+                      IMAGE
+                  ===================================== */}
+
+                  {imageUrl ? (
+                    <img
+                      src={imageUrl}
+                      className="card-img-top"
+                      alt={
+                        place?.name ||
+                        "Tourist Place"
+                      }
+                      style={{
+                        height: "220px",
+                        objectFit: "cover",
+                      }}
+                      onError={(e) => {
+                        e.currentTarget.onerror = null;
+
+                        e.currentTarget.src =
+                          "https://via.placeholder.com/400x220?text=No+Image";
+                      }}
+                    />
+                  ) : (
+                    <div
+                      className="d-flex align-items-center justify-content-center bg-light"
+                      style={{
+                        height: "220px",
+                      }}
+                    >
+                      <span className="text-muted">
+                        No image available
+                      </span>
+                    </div>
+                  )}
+
+                  {/* =====================================
+                      CARD BODY
+                  ===================================== */}
+
+                  <div className="card-body d-flex flex-column">
+
+                    <h4>
+                      {place?.name ||
+                        "Unknown Place"}
+                    </h4>
+
+                    {place?.location && (
                       <p>
-
-                        📍 {item.place?.location}
-
+                        📍 {place.location}
                       </p>
+                    )}
 
+                    <p className="text-muted">
+                      {place?.description ||
+                        "No description available."}
+                    </p>
 
+                    {/* =================================
+                        ACTIONS
+                    ================================= */}
 
-
-                      <p>
-
-                        {item.place?.description}
-
-                      </p>
-
-
-
-
+                    <div className="mt-auto">
 
                       <Link
-
-                        to={`/places/${item.place?.id}`}
-
+                        to={`/places/${place?.id}`}
                         className="btn btn-primary me-2"
-
                       >
-
                         View Details
-
                       </Link>
 
-
-
-
-
                       <button
-
+                        type="button"
                         className="btn btn-danger"
-
-                        onClick={()=>removeWishlist(item.id)}
-
+                        onClick={() =>
+                          removeWishlist(item.id)
+                        }
                       >
-
                         ❌ Remove
-
                       </button>
-
-
-
 
                     </div>
 
-
-
                   </div>
-
-
 
                 </div>
 
+              </div>
+            );
+          })}
 
-
-              ))
-
-            }
-
-
-
-          </div>
-
-
-
-        )
-
-      }
-
-
+        </div>
+      )}
 
     </div>
-
-
   );
-
-
 }
 
-
-
 export default Wishlist;
-

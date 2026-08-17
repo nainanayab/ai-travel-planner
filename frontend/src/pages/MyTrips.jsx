@@ -16,12 +16,14 @@ import {
   FaCreditCard,
 } from "react-icons/fa";
 
+import { BACKEND_URL } from "../config";
+
 // =====================================================
 // API
 // =====================================================
 
 const API = axios.create({
-  baseURL: "http://127.0.0.1:8000",
+  baseURL: BACKEND_URL,
 });
 
 // =====================================================
@@ -304,10 +306,10 @@ function MyTrips() {
     // -------------------------------------------------
 
     if (image.startsWith("/")) {
-      return `http://127.0.0.1:8000${image}`;
+      return `${BACKEND_URL}${image}`;
     }
 
-    return `http://127.0.0.1:8000/${image}`;
+    return `${BACKEND_URL}/${image}`;
   };
 
   // =====================================================

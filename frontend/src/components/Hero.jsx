@@ -1,10 +1,10 @@
-
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { BACKEND_URL } from "../config";
 
 const slides = [
   {
-    image: "http://127.0.0.1:8000/static/images/noor-mahal.jpg",
+    image: `${BACKEND_URL}/static/images/noor-mahal.jpg`,
     title: "Discover Bahawalpur",
     subtitle: "Explore Beautiful Places",
     description:
@@ -12,7 +12,7 @@ const slides = [
   },
 
   {
-    image: "http://127.0.0.1:8000/static/images/lahore-fort.jpg",
+    image: `${BACKEND_URL}/static/images/lahore-fort.jpg`,
     title: "Explore Bahawalpur",
     subtitle: "History & Heritage",
     description:
@@ -20,7 +20,7 @@ const slides = [
   },
 
   {
-    image: "http://127.0.0.1:8000/static/images/multan-fort.jpg",
+    image: `${BACKEND_URL}/static/images/multan-fort.jpg`,
     title: "Experience Culture & History",
     subtitle: "Discover Bahawalpur's Heritage",
     description:
@@ -28,7 +28,7 @@ const slides = [
   },
 
   {
-    image: "http://127.0.0.1:8000/static/images/double-decker.jpg",
+    image: `${BACKEND_URL}/static/images/double-decker.jpg`,
     title: "Travel Around Bahawalpur",
     subtitle: "Explore the City by Double-Decker Bus",
     description:
@@ -161,7 +161,6 @@ function Hero() {
                   </span>
                 </Link>
 
-
                 {/* CITY TO CITY */}
 
                 <Link
@@ -191,7 +190,6 @@ function Hero() {
 
             </div>
 
-
             {/* =================================================
                 EXPLORE PLACES
             ================================================= */}
@@ -213,7 +211,6 @@ function Hero() {
 
       </div>
 
-
       {/* =================================================
           PREVIOUS SLIDE
       ================================================= */}
@@ -227,7 +224,6 @@ function Hero() {
         ❮
       </button>
 
-
       {/* =================================================
           NEXT SLIDE
       ================================================= */}
@@ -240,7 +236,6 @@ function Hero() {
       >
         ❯
       </button>
-
 
       {/* =================================================
           SLIDE DOTS

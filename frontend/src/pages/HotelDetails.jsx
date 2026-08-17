@@ -1,9 +1,7 @@
-
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import API from "../api";
-
-const BACKEND_URL = "http://127.0.0.1:8000";
+import { BACKEND_URL } from "../config";
 
 function HotelDetails() {
   const { id } = useParams();
@@ -42,7 +40,6 @@ function HotelDetails() {
     loadHotel();
   }, [id]);
 
-
   // ==========================================
   // HOTEL IMAGE
   // ==========================================
@@ -62,7 +59,6 @@ function HotelDetails() {
     return `${BACKEND_URL}/static/hotels/${hotel.image_url}`;
   };
 
-
   // ==========================================
   // LOADING
   // ==========================================
@@ -70,17 +66,14 @@ function HotelDetails() {
   if (loading) {
     return (
       <div className="container py-5 text-center">
-
         <div className="spinner-border text-primary" />
 
         <p className="mt-3">
           Loading hotel details...
         </p>
-
       </div>
     );
   }
-
 
   // ==========================================
   // ERROR
@@ -89,26 +82,21 @@ function HotelDetails() {
   if (error) {
     return (
       <div className="container py-5">
-
         <div className="alert alert-danger text-center">
           {error}
         </div>
 
         <div className="text-center">
-
           <Link
             to="/hotels"
             className="btn btn-primary"
           >
             ← Back to Hotels
           </Link>
-
         </div>
-
       </div>
     );
   }
-
 
   // ==========================================
   // HOTEL NOT FOUND
@@ -117,7 +105,6 @@ function HotelDetails() {
   if (!hotel) {
     return (
       <div className="container py-5 text-center">
-
         <h3>
           Hotel not found
         </h3>
@@ -128,14 +115,11 @@ function HotelDetails() {
         >
           ← Back to Hotels
         </Link>
-
       </div>
     );
   }
 
-
   const image = getHotelImage();
-
 
   // ==========================================
   // PAGE
@@ -149,16 +133,13 @@ function HotelDetails() {
       ====================================== */}
 
       <div className="mb-4">
-
         <Link
           to="/hotels"
           className="btn btn-outline-primary"
         >
           ← Back to Hotels
         </Link>
-
       </div>
-
 
       {/* ======================================
           HOTEL CARD
@@ -166,20 +147,18 @@ function HotelDetails() {
 
       <div className="card shadow border-0 overflow-hidden">
 
-
         {/* ====================================
             HOTEL IMAGE
         ==================================== */}
 
         {image ? (
-
           <img
             src={image}
             alt={hotel.name}
             className="w-100"
             style={{
               height: "450px",
-              objectFit: "cover"
+              objectFit: "cover",
             }}
             onError={(e) => {
               console.error(
@@ -191,24 +170,18 @@ function HotelDetails() {
                 "none";
             }}
           />
-
         ) : (
-
           <div
             className="bg-light d-flex align-items-center justify-content-center"
             style={{
-              height: "450px"
+              height: "450px",
             }}
           >
-
             <h5 className="text-muted">
               No image available
             </h5>
-
           </div>
-
         )}
-
 
         {/* ====================================
             HOTEL INFORMATION
@@ -216,13 +189,11 @@ function HotelDetails() {
 
         <div className="card-body p-4 p-md-5">
 
-
           {/* Hotel Name */}
 
           <h1 className="fw-bold mb-3">
             {hotel.name}
           </h1>
-
 
           {/* Location */}
 
@@ -232,7 +203,6 @@ function HotelDetails() {
             </p>
           )}
 
-
           {/* Address */}
 
           {hotel.address && (
@@ -240,7 +210,6 @@ function HotelDetails() {
               🏠 {hotel.address}
             </p>
           )}
-
 
           {/* Category */}
 
@@ -250,21 +219,17 @@ function HotelDetails() {
             </span>
           )}
 
-
           {/* ==================================
               RATING & PRICE
           ================================== */}
 
           <div className="row mb-4">
 
-
             {/* Rating */}
 
             {hotel.rating !== null &&
               hotel.rating !== undefined && (
-
                 <div className="col-md-4 mb-3">
-
                   <div className="border rounded p-3 h-100">
 
                     <h6 className="text-muted">
@@ -276,18 +241,14 @@ function HotelDetails() {
                     </h4>
 
                   </div>
-
                 </div>
               )}
-
 
             {/* Price */}
 
             {hotel.price_per_night !== null &&
               hotel.price_per_night !== undefined && (
-
                 <div className="col-md-4 mb-3">
-
                   <div className="border rounded p-3 h-100">
 
                     <h6 className="text-muted">
@@ -303,12 +264,10 @@ function HotelDetails() {
                     </small>
 
                   </div>
-
                 </div>
               )}
 
           </div>
-
 
           {/* ==================================
               DESCRIPTION
@@ -327,13 +286,11 @@ function HotelDetails() {
 
           </div>
 
-
           {/* ==================================
               CONTACT
           ================================== */}
 
           {(hotel.phone || hotel.email) && (
-
             <div className="mb-4">
 
               <h4 className="fw-bold">
@@ -353,16 +310,13 @@ function HotelDetails() {
               )}
 
             </div>
-
           )}
-
 
           {/* ==================================
               BOOKING BUTTONS
           ================================== */}
 
           <div className="d-flex gap-3 flex-wrap">
-
 
             {/* HOTEL BOOKING */}
 
@@ -372,7 +326,6 @@ function HotelDetails() {
             >
               🏨 Book Hotel
             </Link>
-
 
             {/* BACK TO HOTELS */}
 
@@ -386,9 +339,7 @@ function HotelDetails() {
           </div>
 
         </div>
-
       </div>
-
     </div>
   );
 }

@@ -1,10 +1,8 @@
-
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
 import { getHotels } from "../services/hotelService";
-
-const BACKEND_URL = "http://127.0.0.1:8000";
+import { BACKEND_URL } from "../config";
 
 function Hotels() {
   const [hotels, setHotels] = useState([]);
@@ -80,13 +78,11 @@ function Hotels() {
   if (loading) {
     return (
       <div className="container py-5 text-center">
-
         <div className="spinner-border text-primary"></div>
 
         <p className="mt-3">
           Loading hotels...
         </p>
-
       </div>
     );
   }
@@ -112,7 +108,6 @@ function Hotels() {
 
       </div>
 
-
       {/* Search */}
 
       <div className="mb-4">
@@ -127,7 +122,6 @@ function Hotels() {
 
       </div>
 
-
       {/* Error */}
 
       {error && (
@@ -135,7 +129,6 @@ function Hotels() {
           {error}
         </div>
       )}
-
 
       {/* No Hotels */}
 
@@ -152,7 +145,6 @@ function Hotels() {
 
         </div>
       )}
-
 
       {/* Hotel Cards */}
 
@@ -177,7 +169,6 @@ function Hotels() {
 
               <div className="card h-100 shadow-sm border-0">
 
-
                 {/* Image */}
 
                 {image ? (
@@ -188,7 +179,7 @@ function Hotels() {
                     className="card-img-top"
                     style={{
                       height: "230px",
-                      objectFit: "cover"
+                      objectFit: "cover",
                     }}
                     onError={(e) => {
                       console.error(
@@ -206,7 +197,7 @@ function Hotels() {
                   <div
                     className="bg-light d-flex align-items-center justify-content-center"
                     style={{
-                      height: "230px"
+                      height: "230px",
                     }}
                   >
 
@@ -218,7 +209,6 @@ function Hotels() {
 
                 )}
 
-
                 {/* Card Body */}
 
                 <div className="card-body d-flex flex-column">
@@ -227,18 +217,15 @@ function Hotels() {
                     {hotel.name}
                   </h4>
 
-
                   <p className="text-muted mb-2">
                     📍 {hotel.location}
                   </p>
-
 
                   {hotel.category && (
                     <span className="badge bg-primary align-self-start mb-3">
                       {hotel.category}
                     </span>
                   )}
-
 
                   {hotel.rating !== null &&
                     hotel.rating !== undefined && (
@@ -249,7 +236,6 @@ function Hotels() {
 
                   )}
 
-
                   {hotel.price_per_night !== null &&
                     hotel.price_per_night !== undefined && (
 
@@ -258,7 +244,6 @@ function Hotels() {
                     </p>
 
                   )}
-
 
                   <p className="text-muted">
 
@@ -269,7 +254,6 @@ function Hotels() {
                       : "Comfortable accommodation for your trip."}
 
                   </p>
-
 
                   {/* Details */}
 
@@ -295,4 +279,3 @@ function Hotels() {
 }
 
 export default Hotels;
-

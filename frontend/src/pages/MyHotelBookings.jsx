@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import API from "../api";
+import { BACKEND_URL } from "../config";
 
 function MyHotelBookings() {
   const navigate = useNavigate();
@@ -126,15 +127,21 @@ function MyHotelBookings() {
       return null;
     }
 
-    if (hotel.image_url.startsWith("http")) {
+    // Backend already returned a full URL
+    if (
+      hotel.image_url.startsWith("http://") ||
+      hotel.image_url.startsWith("https://")
+    ) {
       return hotel.image_url;
     }
 
+    // Backend returned an absolute path
     if (hotel.image_url.startsWith("/")) {
-      return `http://127.0.0.1:8000${hotel.image_url}`;
+      return `${BACKEND_URL}${hotel.image_url}`;
     }
 
-    return `http://127.0.0.1:8000/static/images/${hotel.image_url}`;
+    // Backend returned only the filename
+    return `${BACKEND_URL}/static/hotels/${hotel.image_url}`;
   };
 
   // =====================================================
@@ -146,14 +153,13 @@ function MyHotelBookings() {
       return "N/A";
     }
 
-    return new Date(`${date}T00:00:00`).toLocaleDateString(
-      "en-PK",
-      {
-        day: "2-digit",
-        month: "short",
-        year: "numeric",
-      }
-    );
+    return new Date(
+      `${date}T00:00:00`
+    ).toLocaleDateString("en-PK", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    });
   };
 
   // =====================================================

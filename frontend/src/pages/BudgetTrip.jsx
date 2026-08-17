@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import axios from "axios";
+import { BACKEND_URL } from "../config";
 
 import {
   FaMapMarkerAlt,
@@ -21,7 +22,7 @@ import {
   FaExclamationTriangle,
 } from "react-icons/fa";
 
-const API = "http://127.0.0.1:8000";
+const API = BACKEND_URL;
 
 const AI_BUDGET_TRIP_ENDPOINT = `${API}/budget-trip/plan`;
 
@@ -3467,5 +3468,4 @@ function ExpenseInput({
 }
 
 
-export default BudgetTrip;
-
+export default BudgettTrip;

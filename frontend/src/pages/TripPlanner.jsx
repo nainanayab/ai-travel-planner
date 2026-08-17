@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import API from "../api";
 
 import {
   FaMapMarkerAlt,
@@ -17,27 +17,6 @@ import {
   FaSave,
   FaLocationArrow,
 } from "react-icons/fa";
-
-// =====================================================
-// API
-// =====================================================
-
-const API = axios.create({
-  baseURL: "http://127.0.0.1:8000",
-});
-
-API.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem("token");
-
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-
-    return config;
-  },
-  (error) => Promise.reject(error)
-);
 
 // =====================================================
 // COMPONENT
@@ -191,27 +170,19 @@ function TripPlanner() {
     setWeather(null);
 
     try {
-      const response = await axios.get(
-        "https://api.open-meteo.com/v1/forecast",
-        {
-          params: {
-            latitude: coordinates.latitude,
-            longitude: coordinates.longitude,
-
-            current:
-              "temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m",
-
-            daily:
-              "weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max",
-
-            timezone: "auto",
-
-            forecast_days: 7,
-          },
-        }
+      const response = await fetch(
+        `https://api.open-meteo.com/v1/forecast?latitude=${coordinates.latitude}&longitude=${coordinates.longitude}&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=auto&forecast_days=7`
       );
 
-      setWeather(response.data);
+      if (!response.ok) {
+        throw new Error(
+          `Weather request failed with status ${response.status}`
+        );
+      }
+
+      const data = await response.json();
+
+      setWeather(data);
     } catch (err) {
       console.error("Weather error:", err);
 
@@ -402,9 +373,7 @@ function TripPlanner() {
         "/ai-trip/plan",
         {
           location: location.trim(),
-
           place_ids: selectedPlaceIds,
-
           category: category || null,
         }
       );
@@ -432,6 +401,16 @@ function TripPlanner() {
         "Trip planning error:",
         err
       );
+
+      if (err.response?.status === 401) {
+        localStorage.removeItem("token");
+
+        setError(
+          "Your login session has expired. Please login again."
+        );
+
+        return;
+      }
 
       if (err.response?.data?.detail) {
         setError(
@@ -541,6 +520,8 @@ function TripPlanner() {
       if (
         err.response?.status === 401
       ) {
+        localStorage.removeItem("token");
+
         setError(
           "Your login session has expired. Please login again."
         );
@@ -588,11 +569,15 @@ function TripPlanner() {
   // =====================================================
   // INITIAL LOAD
   // =====================================================
-useEffect(() => {
-  if (location) {
-    loadCityPlaces(location, category);
-  }
-}, [location, category]);
+
+  useEffect(() => {
+    if (location) {
+      loadCityPlaces(
+        location,
+        category
+      );
+    }
+  }, [location, category]);
 
   // =====================================================
   // RENDER
@@ -612,6 +597,7 @@ useEffect(() => {
 
             <div className="trip-header-badge">
               <FaRoute />
+
               <span>
                 INSIDE CITY
               </span>
@@ -684,7 +670,9 @@ useEffect(() => {
                   <select
                     id="location"
                     value={location}
-                    onChange={handleCityChange}
+                    onChange={
+                      handleCityChange
+                    }
                   >
 
                     <option value="">
@@ -930,7 +918,7 @@ useEffect(() => {
                 )}
 
                 {/* =================================================
-                    DESTINATIONS — NO IMAGES
+                    DESTINATIONS
                 ================================================= */}
 
                 {location && (
@@ -1081,6 +1069,7 @@ useEffect(() => {
 
                                     <p>
                                       <FaMapMarkerAlt />
+
                                       {
                                         place.location
                                       }
