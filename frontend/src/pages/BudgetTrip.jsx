@@ -3468,4 +3468,4 @@ function ExpenseInput({
 }
 
 
-export default BudgettTrip;
+export default BudgetTrip;
